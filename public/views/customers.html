@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khách hàng - Quán Mì Cay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/customers.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo.png" alt="Logo Quán Mì Cay" class="sidebar-logo">
+                <h3>Mỳ cay UTT</h3>
+            </div>  
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="menu.html"><i class="fas fa-utensils"></i> Quản lý món</a></li>
+                    <li><a href="category.html"><i class="fas fa-tags"></i> Quản lý danh mục</a></li>
+                    <li><a href="account.html"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
+                    <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                    <li><a href="tables.html"><i class="fas fa-table"></i> Quản lý bàn</a></li>
+                    <li><a href="customers.html" class="active"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-user-friends me-2"></i>Quản lý khách hàng</h2>
+                </div>
+                <div class="user-account">
+                    <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Tài khoản
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="account.html">
+                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Customer Table Container -->
+            <div class="customer-table-container">
+                <div class="table-header d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1"><i class="fas fa-list me-2"></i>Danh sách khách hàng</h4>
+                        <small class="text-muted">Quản lý thông tin và trạng thái khách hàng</small>
+                    </div>
+                    <div class="search-filter-group">
+                        <div class="input-group" style="max-width: 350px;">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" id="customerSearch" class="form-control" placeholder="Tìm kiếm theo tên, email, SĐT...">
+                        </div>
+                        <select id="statusFilter" class="form-select ms-2" style="width: auto;">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Bị khóa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Đang tải danh sách khách hàng...</p>
+                </div>
+
+                <!-- Table Container -->
+                <div class="table-responsive">
+                    <table class="table table-hover customer-table" id="customerTable">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="text-center" style="width: 60px;">STT</th>
+                                <th>Tên khách hàng</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th class="text-center" style="width: 120px;">Trạng thái</th>
+                                <th class="text-center" style="width: 150px;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-3x mb-3 opacity-50"></i>
+                                    <p>Đang tải danh sách khách hàng...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-labelledby="customerDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-brown text-white">
+                    <h5 class="modal-title" id="customerDetailModalLabel">
+                        <i class="fas fa-user me-2"></i>Thông tin chi tiết khách hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="customer-info-card">
+                                <h6><i class="fas fa-user-circle me-2"></i>Thông tin cơ bản</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-3">
+                                        <strong class="text-muted"><i class="fas fa-user me-1"></i>Tên:</strong>
+                                        <span id="modalCustomerName" class="ms-2 fw-semibold"></span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="text-muted"><i class="fas fa-envelope me-1"></i>Email:</strong>
+                                        <span id="modalCustomerEmail" class="ms-2 fw-semibold"></span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="text-muted"><i class="fas fa-phone me-1"></i>SĐT:</strong>
+                                        <span id="modalCustomerPhone" class="ms-2 fw-semibold"></span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="text-muted"><i class="fas fa-calendar me-1"></i>Ngày tạo:</strong>
+                                        <span id="modalCustomerCreated" class="ms-2 text-muted small"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="customer-status-card">
+                                <h6><i class="fas fa-info-circle me-2"></i>Trạng thái tài khoản</h6>
+                                <div class="status-badge-container mb-3">
+                                    <span id="modalCustomerStatus" class="badge fs-6"></span>
+                                </div>
+                                <div class="progress mb-3" style="height: 8px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" id="customerActivity"></div>
+                                </div>
+                                <small class="text-muted">Hoạt động gần nhất: <span id="lastActivity"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6><i class="fas fa-history me-2"></i>Lịch sử đơn hàng gần đây</h6>
+                            <div class="service-history">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã đơn</th>
+                                            <th>Ngày đặt</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderHistory">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Không có dữ liệu</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Đóng
+                    </button>
+                    <button type="button" class="btn btn-warning" id="toggleCustomerStatus">
+                        <i class="fas fa-toggle-on me-1"></i>Khóa/Mở tài khoản
+                    </button>
+                    <button type="button" class="btn btn-primary" id="editCustomer">
+                        <i class="fas fa-edit me-1"></i>Sửa thông tin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/customers.js"></script>
+</body>
+</html>

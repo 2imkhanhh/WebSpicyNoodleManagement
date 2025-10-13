@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bàn - Quán Mì Cay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/tables.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo.png" alt="Logo Quán Mì Cay" class="sidebar-logo">
+                <h3>Mỳ cay UTT</h3>
+            </div>
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="menu.html"><i class="fas fa-utensils"></i> Quản lý món</a></li>
+                    <li><a href="category.html"><i class="fas fa-tags"></i> Quản lý danh mục</a></li>
+                    <li><a href="account.html"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
+                    <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                    <li><a href="tables.html" class="active"><i class="fas fa-table"></i> Quản lý bàn</a></li>
+                    <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-table"></i>Quản lý bàn</h2>
+                </div>
+                <div class="user-account">
+                    <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Tài khoản
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="account.html">
+                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+            <div class="table-management">
+                <div class="mb-4">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTableModal">Thêm bàn
+                        mới</button>
+                </div>
+                <div class="table-list">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Số bàn</th>
+                                <th>Sức chứa</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableList">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Thêm bàn -->
+            <div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addTableModalLabel">Thêm bàn mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addTableForm">
+                                <div class="mb-3">
+                                    <label for="tableNumber" class="form-label">Số bàn</label>
+                                    <input type="text" class="form-control" id="tableNumber" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tableCapacity" class="form-label">Sức chứa</label>
+                                    <input type="number" class="form-control" id="tableCapacity" name="quantity"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tableStatus" class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="tableStatus" name="status" disabled>
+                                        <option value="Trống" selected>Trống</option>
+                                        <option value="Có khách">Có khách</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary" id="saveTableBtn">Lưu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Sửa bàn -->
+            <div class="modal fade" id="editTableModal" tabindex="-1" aria-labelledby="editTableModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editTableModalLabel">Sửa thông tin bàn</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editTableForm">
+                                <input type="hidden" id="editTableId" name="table_id">
+                                <div class="mb-3">
+                                    <label for="editTableNumber" class="form-label">Số bàn</label>
+                                    <input type="text" class="form-control" id="editTableNumber" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTableCapacity" class="form-label">Sức chứa</label>
+                                    <input type="number" class="form-control" id="editTableCapacity" name="quantity"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTableStatus" class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="editTableStatus" name="status">
+                                        <option value="Trống">Trống</option>
+                                        <option value="Có khách">Có khách</option>
+                                        <option value="Bàn khách đặt">Bàn khách đặt</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary" id="saveEditTableBtn">Lưu thay đổi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="paymentModalLabel">Thanh toán bàn</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="paymentInfo">
+                                <h6>Thông tin bàn:</h6>
+                                <p><strong>Số bàn:</strong> <span id="paymentTableName"></span></p>
+                                <p><strong>Trạng thái:</strong> <span id="paymentTableStatus"></span></p>
+                            </div>
+
+                            <div id="orderDetails" style="display: none;">
+                                <h6>Chi tiết đơn hàng:</h6>
+                                <div id="paymentOrderItems"></div>
+                                <hr>
+                                <p class="fw-bold fs-5"><strong>Tổng tiền:</strong> <span id="paymentTotal"></span> VNĐ
+                                </p>
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="paymentMethod" class="form-label">Phương thức thanh toán:</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="cash">Tiền mặt</option>
+                                    <option value="card">Thẻ</option>
+                                    <option value="transfer">Chuyển khoản</option>
+                                </select>
+                            </div>
+
+                            <div class="mt-3" id="cashAmountDiv" style="display: none;">
+                                <label for="cashAmount" class="form-label">Số tiền khách đưa:</label>
+                                <input type="number" class="form-control" id="cashAmount" min="0">
+                                <div id="changeAmount" class="mt-2"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn" disabled>Thanh
+                                toán</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/table.js"></script>
+    <script>
+        function logout() {
+            alert("Đăng xuất thành công!");
+            window.location.href = "/SpicyNoodleProject/public/views/login.html";
+        }
+    </script>

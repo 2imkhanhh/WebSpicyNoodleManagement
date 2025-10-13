@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý món - Quán Mì Cay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/menu.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo.png" alt="Logo Quán Mì Cay" class="sidebar-logo">
+                <h3>Mỳ cay UTT</h3>
+            </div>  
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="menu.html" class="active"><i class="fas fa-utensils"></i> Quản lý món</a></li>
+                    <li><a href="category.html"><i class="fas fa-tags"></i> Quản lý danh mục</a></li>
+                    <li><a href="account.html"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
+                    <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                    <li><a href="tables.html"><i class="fas fa-table"></i> Quản lý bàn</a></li>
+                    <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-utensils"></i>Quản lý món</h2>
+                </div>
+                <div class="user-account">
+                    <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Tài khoản
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="account.html">
+                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+            <div class="container">
+                <ul class="nav nav-pills mb-3" id="categoryTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-category="">Tất cả</a>
+                    </li>
+                    
+                </ul>
+                <div class="mb-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMenuModal">Thêm món mới</button>
+                </div>
+                <div class="menu-grid">
+                    
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addMenuModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMenuModalLabel">Thêm món mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMenuForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="menuName" class="form-label">Tên món</label>
+                            <input type="text" class="form-control" id="menuName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryId" class="form-label">Danh mục</label>
+                            <select class="form-select" id="categoryId" name="category_id" required>
+                                <option value="">----------Chọn danh mục----------</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Giá</label>
+                            <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Ảnh món ăn</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveMenuBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editMenuModal" tabindex="-1" aria-labelledby="editMenuModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMenuModalLabel">Sửa món</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMenuForm" enctype="multipart/form-data">
+                        <input type="hidden" id="editFoodId" name="food_id">
+                        <div class="mb-3">
+                            <label for="editMenuName" class="form-label">Tên món</label>
+                            <input type="text" class="form-control" id="editMenuName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCategoryId" class="form-label">Danh mục</label>
+                            <select class="form-select" id="editCategoryId" name="category_id" required>
+                                <option value="">----------Chọn danh mục----------</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPrice" class="form-label">Giá</label>
+                            <input type="number" step="0.01" class="form-control" id="editPrice" name="price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editImage" class="form-label">Ảnh món ăn (không bắt buộc)</label>
+                            <input type="file" class="form-control" id="editImage" name="image" accept="image/*">
+                            <img id="editImagePreview" src="" alt="Ảnh hiện tại" style="max-width: 200px; display: none; margin-top: 10px;">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveEditMenuBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/menu.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script>
+        function logout() {
+            alert("Đăng xuất thành công!");
+            window.location.href = "/SpicyNoodleProject/public/views/login.html";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - Quán Mì Cay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/orders.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo.png" alt="Logo Quán Mì Cay" class="sidebar-logo">
+                <h3>Mỳ cay UTT</h3>
+            </div>  
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="menu.html"><i class="fas fa-utensils"></i> Quản lý món</a></li>
+                    <li><a href="category.html"><i class="fas fa-tags"></i> Quản lý danh mục</a></li>
+                    <li><a href="account.html"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
+                    <li><a href="orders.html" class="active"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                    <li><a href="tables.html"><i class="fas fa-table"></i> Quản lý bàn</a></li>
+                    <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-shopping-cart"></i>Quản lý đơn hàng</h2>
+                </div>
+                <div class="user-account">
+                    <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Tài khoản
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="account.html">
+                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+            <div class="order-management">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="openAddModal()">Thêm đơn hàng mới</button>
+                </div>
+                <div class="order-table">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Bàn</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Thêm đơn hàng -->
+    <div id="addOrderModal" class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addOrderModalLabel">Thêm đơn hàng mới</h5>
+                    <button type="button" class="btn-close" onclick="closeAddModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addOrderForm">
+                        <div class="mb-3">
+                            <label for="addOrderDate" class="form-label">Ngày đặt</label>
+                            <input type="date" class="form-control" id="addOrderDate" name="orderDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addStatus" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="addStatus" name="status" required disabled>
+                                <option value="unpaid" selected>Chưa thanh toán</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTableID" class="form-label">Số bàn</label>
+                            <select class="form-select" id="addTableID" name="tableID" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Thêm món ăn</label>
+                            <table class="table" id="addOrderItemsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tên món</th>
+                                        <th>Giá</th>
+                                        <th>Số lượng</th>
+                                        <th>Tổng phụ</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-secondary" id="addAddItemBtn">Thêm món</button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addTotalPrice" class="form-label">Tổng tiền</label>
+                            <input type="number" step="0.01" class="form-control" id="addTotalPrice" name="totalPrice" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveAddOrderBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sửa đơn hàng -->
+    <div id="editOrderModal" class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editOrderModalLabel">Sửa đơn hàng</h5>
+                    <button type="button" class="btn-close" onclick="closeEditModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="editOrderForm">
+                        <input type="hidden" id="editOrderId" name="order_id">
+                        <div class="mb-3">
+                            <label for="editOrderDate" class="form-label">Ngày đặt</label>
+                            <input type="date" class="form-control" id="editOrderDate" name="orderDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="editStatus" name="status" required>
+                                <option value="unpaid">Chưa thanh toán</option>
+                                <option value="paid">Đã thanh toán</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTableID" class="form-label">Số bàn</label>
+                            <select class="form-select" id="editTableID" name="tableID" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chi tiết món ăn</label>
+                            <table class="table" id="editOrderItemsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tên món</th>
+                                        <th>Giá</th>
+                                        <th>Số lượng</th>
+                                        <th>Tổng phụ</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-secondary" id="addEditItemBtn">Thêm món</button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTotalPrice" class="form-label">Tổng tiền</label>
+                            <input type="number" step="0.01" class="form-control" id="editTotalPrice" name="totalPrice" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveEditOrderBtn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/orders.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script>
+        function logout() {
+            alert("Đăng xuất thành công!");
+            window.location.href = "/SpicyNoodleProject/public/views/login.html";
+        }
+
+        function openAddModal() {
+            document.getElementById('addOrderModal').style.display = 'block';
+            loadAvailableTables('addTableID');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addOrderModal').style.display = 'none';
+        }
+
+        function openEditModal() {
+            document.getElementById('editOrderModal').style.display = 'block';
+            // Xóa event listener cũ nếu có
+            const select = document.getElementById('editTableID');
+            const newSelect = select.cloneNode(true);
+            select.parentNode.replaceChild(newSelect, select);
+        }
+
+        function closeEditModal() {
+            document.getElementById('editOrderModal').style.display = 'none';
+        }
+
+        // Đóng modal khi nhấn ra ngoài
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>

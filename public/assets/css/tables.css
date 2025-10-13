@@ -1,0 +1,183 @@
+.table-management {
+    background: white;
+    padding: 1.8rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.table-management .btn-primary {
+    background-color: #B85C38;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.table-management .btn-primary:hover {
+    background-color: #8F4228;
+}
+
+.table-list .table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table-list .table th,
+.table-list .table td {
+    padding: 0.8rem;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1rem;
+    color: #4A2C2A;
+}
+
+.table-list .table th {
+    background-color: #F5E8C7;
+    color: #B85C38;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 2px solid #D68C45;
+}
+
+.table-list .table td {
+    border-bottom: 1px solid #D68C45;
+}
+
+.table-list .table tr:hover {
+    background-color: #F5E8C7;
+}
+
+.table-list .badge {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 5px;
+}
+
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.table-list .btn-sm {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+    margin: 0 0.2rem;
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: 1px solid #D68C45;
+}
+
+.modal-header {
+    background-color: #F5E8C7;
+    color: #B85C38;
+    border-bottom: 1px solid #D68C45;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+.modal-body .form-label {
+    color: #4A2C2A;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    border: 1px solid #D68C45;
+    border-radius: 5px;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    border-color: #B85C38;
+    box-shadow: 0 0 5px rgba(184, 92, 56, 0.3);
+}
+
+.modal-footer .btn-secondary {
+    background-color: #8F4228;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-footer .btn-primary {
+    background-color: #B85C38;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #8F4228;
+}
+
+#paymentTotalLine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f5ef;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: #3b2b23;
+    letter-spacing: 0.2px;
+}
+
+#paymentTotalLine strong {
+    color: #B85C38;
+    font-weight: 700;
+    font-family: "Poppins", "Segoe UI", "Roboto", sans-serif;
+}
+
+#paymentTotal {
+    font-weight: 600;
+    color: #222;
+    font-variant-numeric: tabular-nums; 
+}
+
+.currency {
+    margin-left: 4px;
+    font-size: 1rem;
+    color: #555;
+}
+
+b, strong{
+    font-family: monospace !important;
+    font-weight: 700 !important;
+}
+
+@media (max-width: 768px) {
+    .table-management {
+        padding: 1.2rem;
+    }
+
+    .table-list .table th,
+    .table-list .table td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .table-list .btn-sm {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .modal-body .form-label,
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 0.9rem;
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+    }
+}

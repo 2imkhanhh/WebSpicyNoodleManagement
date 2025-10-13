@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản - Quán Mì Cay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/login_register.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/account.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/images/logo.png" alt="Logo Quán Mì Cay" class="sidebar-logo">
+                <h3>Mỳ cay UTT</h3>
+            </div>  
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="menu.html"><i class="fas fa-utensils"></i> Quản lý món</a></li>
+                    <li><a href="category.html"><i class="fas fa-tags"></i> Quản lý danh mục</a></li>
+                    <li><a href="account.html" class="active"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
+                    <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                    <li><a href="tables.html"><i class="fas fa-table"></i> Quản lý bàn</a></li>
+                    <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2><i class="fas fa-users-cog"></i>Quản lý tài khoản</h2>
+                </div>
+                <div class="user-account">
+                    <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Tài khoản
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="account.html">
+                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+            <div class="container">
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">Thêm tài khoản mới</button>
+                    <div class="search-container">
+                        <div class="input-group">
+                            <select class="form-select search-criteria" id="searchCriteria">
+                                <option value="name">Tên tài khoản</option>
+                                <option value="email">Email</option>
+                                <option value="phone">Số điện thoại</option>
+                                <option value="role">Vai trò</option>
+                                <option value="status">Trạng thái</option>
+                            </select>
+                            <input type="text" class="form-control search-input" id="accountSearch" placeholder="Tìm kiếm..." aria-label="Tìm kiếm">
+                            <button class="btn btn-outline-secondary search-btn" type="button" id="searchButton">
+                                <i class='bx bx-search'></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="account-grid" id="accountGrid">
+                    <!-- Dữ liệu sẽ được thêm động bằng JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAccountModalLabel">Thêm tài khoản mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccountForm">
+                        <div class="mb-3">
+                            <label for="accountName" class="form-label">Tên tài khoản</label>
+                            <input type="text" class="form-control" id="accountName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="accountEmail" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="accountPhone" name="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountPassword" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="accountPassword" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountRole" class="form-label">Vai trò</label>
+                            <select class="form-select" id="accountRole" name="role" required>
+                                <option value="0">Khách hàng</option>
+                                <option value="1">Nhân viên</option>
+                                <option value="2">Quản lý</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="status" value="1">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveAccountBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAccountModalLabel">Sửa tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAccountForm">
+                        <input type="hidden" id="editAccountId" name="account_id">
+                        <div class="mb-3">
+                            <label for="editAccountName" class="form-label">Tên tài khoản</label>
+                            <input type="text" class="form-control" id="editAccountName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editAccountEmail" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="editAccountPhone" name="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountRole" class="form-label">Vai trò</label>
+                            <select class="form-select" id="editAccountRole" name="role" required>
+                                <option value="0">Khách hàng</option>
+                                <option value="1">Nhân viên</option>
+                                <option value="2">Quản lý</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAccountStatus" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="editAccountStatus" name="status">
+                                <option value="1">Hoạt động</option>
+                                <option value="0">Khóa</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="saveEditAccountBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/account.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script>
+        function logout() {
+            alert("Đăng xuất thành công!");
+            window.location.href = "/SpicyNoodleProject/public/views/login.html";
+        }
+    </script>
+</body>
+</html>

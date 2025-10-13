@@ -1,0 +1,326 @@
+/* ===== Customer Table Container ===== */
+.customer-table-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.table-header h4 {
+    color: #B85C38;
+    font-weight: 600;
+    margin: 0;
+}
+
+.table-header small {
+    font-size: 0.9rem;
+}
+
+/* ===== Search and Filter ===== */
+.search-filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#customerSearch, #statusFilter {
+    border: 1px solid #D68C45;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+#customerSearch:focus {
+    border-color: #B85C38;
+    box-shadow: 0 0 0 0.2rem rgba(184, 92, 56, 0.25);
+}
+
+/* ===== Customer Table ===== */
+.customer-table {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+.customer-table thead th {
+    background: linear-gradient(135deg, #F5E8C7 0%, #E8D5B7 100%);
+    color: #B85C38;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 15px 12px;
+    vertical-align: middle;
+}
+
+.customer-table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+.customer-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.customer-table tbody tr:hover {
+    background-color: #fff5e6;
+}
+
+.customer-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* ===== Status Badge ===== */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* ===== Action Buttons ===== */
+.btn-view {
+    background: linear-gradient(135deg, #B85C38 0%, #A54A2E 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, #8F4228 0%, #7A3A24 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 92, 56, 0.3);
+}
+
+.btn-view i {
+    font-size: 0.9rem;
+}
+
+/* ===== Modal Styles ===== */
+.modal-content {
+    border-radius: 12px;
+    border: 1px solid #D68C45;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header.bg-brown {
+    background: linear-gradient(135deg, #B85C38 0%, #A54A2E 100%) !important;
+    border-bottom: 1px solid #D68C45;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.customer-info-card, .customer-status-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #B85C38;
+}
+
+.customer-info-card h6, .customer-status-card h6 {
+    color: #B85C38;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.customer-info-card strong {
+    color: #495057;
+    min-width: 100px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.status-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#modalCustomerStatus {
+    font-size: 1rem;
+    padding: 8px 16px;
+}
+
+/* ===== Service History Table ===== */
+.service-history .table {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.service-history thead th {
+    background-color: #F5E8C7;
+    color: #B85C38;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 10px;
+}
+
+.service-history tbody td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+/* ===== Pagination ===== */
+.pagination .page-link {
+    color: #B85C38;
+    border: 1px solid #D68C45;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #B85C38;
+    border-color: #B85C38;
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f5ef;
+    border-color: #B85C38;
+}
+
+/* ===== Loading States ===== */
+.loading-overlay {
+    position: relative;
+}
+
+.loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 8px;
+}
+
+.loading-overlay.loading::after {
+    display: flex;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .customer-table-container {
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .search-filter-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-filter-group > * {
+        width: 100% !important;
+        max-width: none;
+    }
+    
+    .stat-card {
+        margin-bottom: 15px;
+    }
+    
+    .customer-table {
+        font-size: 0.85rem;
+    }
+    
+    .customer-table thead th,
+    .customer-table tbody td {
+        padding: 8px 6px;
+    }
+    
+    .btn-view {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .customer-table thead {
+        display: none;
+    }
+    
+    .customer-table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+    }
+    
+    .customer-table tbody td {
+        display: block;
+        text-align: right;
+        padding: 5px 0;
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+    
+    .customer-table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        font-weight: 600;
+        color: #B85C38;
+    }
+}
+
+/* ===== Custom Scrollbar ===== */
+.customer-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customer-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb {
+    background: #B85C38;
+    border-radius: 3px;
+}
+
+.customer-table-container::-webkit-scrollbar-thumb:hover {
+    background: #8F4228;
+}
