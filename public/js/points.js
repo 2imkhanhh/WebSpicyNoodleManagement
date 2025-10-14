@@ -2,8 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPointsRules();
     loadVoucherRules();
 
-    document.getElementById('pointsRuleForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+    document.getElementById('savePointRuleBtn').addEventListener('click', async () => {
         const data = {
             min_amount: parseFloat(document.getElementById('minAmount').value),
             max_amount: document.getElementById('maxAmount').value ? parseFloat(document.getElementById('maxAmount').value) : null,
@@ -13,12 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
+        }).then(() => {
+            loadPointsRules();
+            $('#addPointRuleModal').modal('hide');
         });
-        loadPointsRules();
     });
 
-    document.getElementById('voucherRuleForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+    document.getElementById('saveVoucherRuleBtn').addEventListener('click', async () => {
         const data = {
             voucher_code: document.getElementById('voucherCode').value,
             point_require: parseInt(document.getElementById('pointRequire').value),
@@ -28,68 +28,96 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
+        }).then(() => {
+            loadVoucherRules();
+            $('#addVoucherRuleModal').modal('hide');
         });
-        loadVoucherRules();
+    });
+
+    document.getElementById('saveEditPointRuleBtn').addEventListener('click', async () => {
+        const id = document.getElementById('editRuleId').value;
+        const data = {
+            min_amount: parseFloat(document.getElementById('editMinAmount').value),
+            max_amount: document.getElementById('editMaxAmount').value ? parseFloat(document.getElementById('editMaxAmount').value) : null,
+            points_earned: parseInt(document.getElementById('editPointsEarned').value)
+        };
+        await fetch(`http://localhost:81/SpicyNoodleProject/api/points/rules.php?id=${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            loadPointsRules();
+            $('#editPointRuleModal').modal('hide');
+        });
+    });
+
+    document.getElementById('saveEditVoucherRuleBtn').addEventListener('click', async () => {
+        const id = document.getElementById('editVoucherId').value;
+        const data = {
+            voucher_code: document.getElementById('editVoucherCode').value,
+            point_require: parseInt(document.getElementById('editPointRequire').value),
+            discount_percent: parseInt(document.getElementById('editDiscountPercent').value)
+        };
+        await fetch(`http://localhost:81/SpicyNoodleProject/api/vouchers/rules.php?id=${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            loadVoucherRules();
+            $('#editVoucherRuleModal').modal('hide');
+        });
     });
 });
 
 async function loadPointsRules() {
     const res = await fetch('http://localhost:81/SpicyNoodleProject/api/points/rules.php');
     const result = await res.json();
-    const tbody = document.getElementById('pointsTable');
-    tbody.innerHTML = '';
+    const grid = document.getElementById('pointsGrid');
+    grid.innerHTML = '';
     result.data.forEach(rule => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${rule.min_amount.toLocaleString('vi-VN')} VNĐ</td>
-            <td>${rule.max_amount ? rule.max_amount.toLocaleString('vi-VN') : '∞'} VNĐ</td>
-            <td>${rule.points_earned} điểm</td>
-            <td>
-                <button class="btn btn-sm btn-warning edit-btn" onclick="editPointRule(${rule.rule_id})">Sửa</button>
-                <button class="btn btn-sm btn-danger delete-btn" onclick="deletePointRule(${rule.rule_id})">Xóa</button>
-            </td>
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+            <h5>Mức: ${rule.min_amount.toLocaleString('vi-VN')} - ${rule.max_amount ? rule.max_amount.toLocaleString('vi-VN') : '∞'} VNĐ</h5>
+            <p>Điểm: ${rule.points_earned} điểm</p>
+            <div class="actions">
+                <button class="btn btn-warning btn-sm btn-action" onclick="editPointRule(${rule.rule_id})">Sửa</button>
+                <button class="btn btn-danger btn-sm btn-action" onclick="deletePointRule(${rule.rule_id})">Xóa</button>
+            </div>
         `;
-        tbody.appendChild(tr);
+        grid.appendChild(card);
     });
 }
 
 async function loadVoucherRules() {
     const res = await fetch('http://localhost:81/SpicyNoodleProject/api/vouchers/rules.php');
     const result = await res.json();
-    const tbody = document.getElementById('voucherTable');
-    tbody.innerHTML = '';
+    const grid = document.getElementById('vouchersGrid');
+    grid.innerHTML = '';
     result.data.forEach(rule => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${rule.point_require} điểm</td>
-            <td>${rule.discount_percent}%</td>
-            <td>${rule.voucher_code}</td>
-            <td>
-                <button class="btn btn-sm btn-warning edit-btn" onclick="editVoucherRule(${rule.voucher_id})">Sửa</button>
-                <button class="btn btn-sm btn-danger delete-btn" onclick="deleteVoucherRule(${rule.voucher_id})">Xóa</button>
-            </td>
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+            <h5>Mã: ${rule.voucher_code}</h5>
+            <p>Điểm: ${rule.point_require} - Giảm: ${rule.discount_percent}%</p>
+            <div class="actions">
+                <button class="btn btn-warning btn-sm btn-action" onclick="editVoucherRule(${rule.voucher_id})">Sửa</button>
+                <button class="btn btn-danger btn-sm btn-action" onclick="deleteVoucherRule(${rule.voucher_id})">Xóa</button>
+            </div>
         `;
-        tbody.appendChild(tr);
+        grid.appendChild(card);
     });
 }
 
-// Placeholder functions (to be implemented)
 async function editPointRule(id) {
-    const minAmount = prompt('Nhập số tiền tối thiểu (VNĐ):');
-    const maxAmount = prompt('Nhập số tiền tối đa (VNĐ, để trống nếu không giới hạn):');
-    const pointsEarned = prompt('Nhập số điểm tích được:');
-    if (minAmount && pointsEarned) {
-        await fetch(`http://localhost:81/SpicyNoodleProject/api/points/rules.php?id=${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                min_amount: parseFloat(minAmount),
-                max_amount: maxAmount ? parseFloat(maxAmount) : null,
-                points_earned: parseInt(pointsEarned)
-            })
-        });
-        loadPointsRules();
-    }
+    const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/points/rules.php?id=${id}`);
+    const result = await res.json();
+    const rule = result.data;
+    document.getElementById('editRuleId').value = id;
+    document.getElementById('editMinAmount').value = rule.min_amount;
+    document.getElementById('editMaxAmount').value = rule.max_amount || '';
+    document.getElementById('editPointsEarned').value = rule.points_earned;
+    $('#editPointRuleModal').modal('show');
 }
 
 async function deletePointRule(id) {
@@ -102,21 +130,14 @@ async function deletePointRule(id) {
 }
 
 async function editVoucherRule(id) {
-    const pointRequire = prompt('Nhập số điểm cần đổi:');
-    const discountPercent = prompt('Nhập phần trăm giảm giá (%):');
-    const voucherCode = prompt('Nhập mã voucher:');
-    if (pointRequire && discountPercent && voucherCode) {
-        await fetch(`http://localhost:81/SpicyNoodleProject/api/vouchers/rules.php?id=${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                point_require: parseInt(pointRequire),
-                discount_percent: parseInt(discountPercent),
-                voucher_code: voucherCode
-            })
-        });
-        loadVoucherRules();
-    }
+    const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/vouchers/rules.php?id=${id}`);
+    const result = await res.json();
+    const rule = result.data;
+    document.getElementById('editVoucherId').value = id;
+    document.getElementById('editVoucherCode').value = rule.voucher_code;
+    document.getElementById('editPointRequire').value = rule.point_require;
+    document.getElementById('editDiscountPercent').value = rule.discount_percent;
+    $('#editVoucherRuleModal').modal('show');
 }
 
 async function deleteVoucherRule(id) {
