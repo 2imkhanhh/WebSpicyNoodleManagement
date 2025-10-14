@@ -58,8 +58,16 @@
                             <h5>Quy định tích điểm</h5>
                             <form id="pointsRuleForm">
                                 <div class="mb-3">
-                                    <label class="form-label">Số tiền (VNĐ) để tích 1 điểm</label>
-                                    <input type="number" class="form-control" id="pointsPerAmount" value="10000" min="1">
+                                    <label class="form-label">Số tiền tối thiểu (VNĐ)</label>
+                                    <input type="number" step="0.01" class="form-control" id="minAmount" value="100000">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số tiền tối đa (VNĐ, để trống nếu không giới hạn)</label>
+                                    <input type="number" step="0.01" class="form-control" id="maxAmount" value="200000">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số điểm tích được</label>
+                                    <input type="number" class="form-control" id="pointsEarned" value="10">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Cập nhật</button>
                             </form>
@@ -70,12 +78,16 @@
                             <h5>Quy định đổi voucher</h5>
                             <form id="voucherRuleForm">
                                 <div class="mb-3">
-                                    <label class="form-label">Số điểm để đổi voucher</label>
-                                    <input type="number" class="form-control" id="pointsForVoucher" value="100" min="1">
+                                    <label class="form-label">Số điểm cần đổi</label>
+                                    <input type="number" class="form-control" id="pointRequire" value="10">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Phần trăm giảm giá (%)</label>
-                                    <input type="number" class="form-control" id="voucherDiscount" value="10" min="1" max="100">
+                                    <input type="number" class="form-control" id="discountPercent" value="10" min="1" max="100">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mã voucher</label>
+                                    <input type="text" class="form-control" id="voucherCode" value="VOUCHER001">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Cập nhật</button>
                             </form>
@@ -83,23 +95,29 @@
                     </div>
                 </div>
                 <div class="mt-4">
+                    <h6>Quy định tích điểm</h6>
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Số tiền/1 điểm</th>
-                                <th>Số điểm/Voucher</th>
-                                <th>Giảm giá (%)</th>
+                                <th>Tối thiểu (VNĐ)</th>
+                                <th>Tối đa (VNĐ)</th>
+                                <th>Điểm tích</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
-                        <tbody id="pointsTable">
+                        <tbody id="pointsTable"></tbody>
+                    </table>
+                    <h6 class="mt-4">Quy định voucher</h6>
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>10.000 VNĐ</td>
-                                <td>100 điểm</td>
-                                <td>10%</td>
-                                <td><button class="btn btn-warning btn-sm edit-btn">Sửa</button></td>
+                                <th>Điểm cần</th>
+                                <th>Giảm giá (%)</th>
+                                <th>Mã voucher</th>
+                                <th>Hành động</th>
                             </tr>
-                        </tbody>
+                        </thead>
+                        <tbody id="voucherTable"></tbody>
                     </table>
                 </div>
             </div>
