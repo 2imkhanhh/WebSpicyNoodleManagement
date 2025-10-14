@@ -1,0 +1,84 @@
+.points-management {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.points-management h3 {
+    color: #B85C38;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.card {
+    background: white;
+    border: 1px solid #D68C45;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h5 {
+    color: #4A2C2A;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.form-label {
+    color: #4A2C2A;
+    font-weight: 500;
+}
+
+.form-control {
+    border-color: #D68C45;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #B85C38;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #8F4228;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #F5E8C7;
+}
+
+.table th {
+    background-color: #B85C38;
+    color: white;
+    font-weight: 600;
+}
+
+.edit-btn {
+    background-color: #D68C45;
+    color: white;
+    border: none;
+}
+
+.edit-btn:hover {
+    background-color: #B85C38;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .points-management {
+        padding: 1.5rem;
+    }
+    .row > .col-md-6 {
+        margin-bottom: 1.5rem;
+    }
+    .table {
+        font-size: 0.9rem;
+    }
+}
