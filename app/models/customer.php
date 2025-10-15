@@ -14,38 +14,44 @@ class Customer {
 
     // Tạo customer từ account mới đăng ký
     public function createFromAccount($account_id) {
-    error_log("=== Customer createFromAccount DEBUG ===");
-    error_log("Account ID: $account_id");
-    
-    if (!$account_id || $account_id <= 0) {
-        error_log("Invalid account_id: $account_id");
-        return false;
+        error_log("=== Customer createFromAccount DEBUG ===");
+        error_log("Account ID: $account_id");
+        
+        if (!$account_id || $account_id <= 0) {
+            error_log("Invalid account_id: $account_id");
+            return false;
+        }
+        
+        // Kiểm tra xem customer đã tồn tại chưa
+        if ($this->existsByAccountId($account_id)) {
+            error_log("Customer already exists for account_id: $account_id");
+            return true; // Đã tồn tại thì không cần tạo mới
+        }
+        
+        $query = "INSERT INTO {$this->table} (account_id, points, order_id) 
+                VALUES (:account_id, 0, 0)";
+        
+        error_log("Customer query: " . $query);
+        
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            $error = $this->conn->errorInfo();
+            error_log("Customer prepare failed: " . json_encode($error));
+            return false;
+        }
+        
+        $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
+        
+        $result = $stmt->execute();
+        if (!$result) {
+            $error = $stmt->errorInfo();
+            error_log("Customer execute failed: " . json_encode($error));
+            return false;
+        }
+        
+        error_log("Customer created successfully");
+        return true;
     }
-    
-    $query = "INSERT INTO {$this->table} (account_id, points, order_id) 
-              VALUES (:account_id, 0, 0)";
-    
-    error_log("Customer query: " . $query);
-    
-    $stmt = $this->conn->prepare($query);
-    if (!$stmt) {
-        $error = $this->conn->errorInfo();
-        error_log("Customer prepare failed: " . json_encode($error));
-        return false;
-    }
-    
-    $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
-    
-    $result = $stmt->execute();
-    if (!$result) {
-        $error = $stmt->errorInfo();
-        error_log("Customer execute failed: " . json_encode($error));
-        return false;
-    }
-    
-    error_log("Customer created successfully");
-    return true;
-}
 
     // Kiểm tra customer đã tồn tại theo account_id
     public function existsByAccountId($account_id) {
@@ -54,6 +60,43 @@ class Customer {
         $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->rowCount() > 0;
+    }
+
+    // Xóa customer theo account_id (MỚI THÊM)
+    public function deleteByAccountId($account_id) {
+        error_log("=== Customer deleteByAccountId DEBUG ===");
+        error_log("Account ID: $account_id");
+        
+        if (!$account_id || $account_id <= 0) {
+            error_log("Invalid account_id: $account_id");
+            return false;
+        }
+        
+        // Kiểm tra xem customer có tồn tại không
+        if (!$this->existsByAccountId($account_id)) {
+            error_log("Customer does not exist for account_id: $account_id");
+            return true; // Không tồn tại thì coi như thành công
+        }
+        
+        $query = "DELETE FROM {$this->table} WHERE account_id = :account_id";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            $error = $this->conn->errorInfo();
+            error_log("Customer delete prepare failed: " . json_encode($error));
+            return false;
+        }
+        
+        $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
+        $result = $stmt->execute();
+        
+        if ($result) {
+            error_log("Customer deleted successfully for account_id: $account_id");
+        } else {
+            $error = $stmt->errorInfo();
+            error_log("Customer delete execute failed: " . json_encode($error));
+        }
+        
+        return $result;
     }
 
     // Lấy tất cả customers với thông tin account
@@ -113,6 +156,17 @@ class Customer {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":customer_id", $customer_id, PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public function getByPhone($phone) {
+        $query = "SELECT c.*, a.name, a.email, a.phone 
+                FROM {$this->table} c 
+                JOIN accounts a ON c.account_id = a.account_id 
+                WHERE a.phone = :phone LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":phone", $phone);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
 ?>

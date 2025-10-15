@@ -14,31 +14,24 @@ class AccountController {
     }
 
     public function register($data) {
-        // Validation (giữ nguyên)
         if (empty($data->phone) || empty($data->password) || empty($data->name)) {
             Response::json(["message" => "Vui lòng nhập đầy đủ thông tin!"], 400);
             return;
         }
 
-        // Kiểm tra exists với giá trị thực
         $email_check = $data->email ?? null;
         if ($this->account->exists($email_check, $data->phone)) {
             Response::json(["message" => "Email hoặc số điện thoại đã tồn tại!"], 409);
             return;
         }
 
-        // ✅ SET PROPERTIES ĐÚNG CÁCH
         $this->account->name = $data->name;
         $this->account->email = $data->email ?? null;
         $this->account->phone = $data->phone;
         $this->account->password = $data->password;
-        
-        // Debug log
-        error_log("Controller setting - name: " . $this->account->name);
-        error_log("Controller setting - phone: " . $this->account->phone);
-        
+
         $account_id = $this->account->registerWithCustomer();
-        
+
         if ($account_id) {
             Response::json([
                 "success" => true,
@@ -64,7 +57,6 @@ class AccountController {
         $user = $this->account->login();
 
         if ($user) {
-            //lưu thông tin người dùng
             session_start();
             $_SESSION['user'] = [
                 "id" => $user["account_id"],
@@ -83,6 +75,7 @@ class AccountController {
             Response::json(["message" => "Sai tài khoản hoặc mật khẩu!"], 401);
         }
     }
+
     public function get() {
         if ($_SERVER['REQUEST_METHOD'] != "GET") {
             return array("message" => "Method not allowed.", "success" => false, "status" => 405);
@@ -98,7 +91,7 @@ class AccountController {
             }
             return array("message" => "Tài khoản theo ID", "success" => true, "status" => 200, "data" => $accounts);
         } else {
-            if ($role_filter === '0') { //lấy role khách hàng
+            if ($role_filter === '0') {
                 return $this->getCustomers();
             } else {
                 $accounts = $this->account->get();
@@ -132,7 +125,7 @@ class AccountController {
         $this->account->email = htmlspecialchars($input_data['email']);
         $this->account->phone = htmlspecialchars($input_data['phone']);
         $this->account->password = htmlspecialchars($input_data['password']);
-        $this->account->role = htmlspecialchars($input_data['role']); // 0, 1, 2
+        $this->account->role = htmlspecialchars($input_data['role']);
         $this->account->status = htmlspecialchars($input_data['status']);
 
         if ($this->account->create()) {
@@ -171,7 +164,7 @@ class AccountController {
         $this->account->name = htmlspecialchars(strip_tags($input_data['name']));
         $this->account->email = htmlspecialchars(strip_tags($input_data['email']));
         $this->account->phone = htmlspecialchars(strip_tags($input_data['phone']));
-        $this->account->role = htmlspecialchars(strip_tags($input_data['role'])); // 0, 1, 2
+        $this->account->role = htmlspecialchars(strip_tags($input_data['role']));
         $this->account->status = htmlspecialchars(strip_tags($input_data['status']));
 
         if ($this->account->update()) {
