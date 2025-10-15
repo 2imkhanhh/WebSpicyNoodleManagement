@@ -36,7 +36,10 @@
     box-shadow: 0 0 0 0.2rem rgba(184, 92, 56, 0.25);
 }
 
-/* ===== Customer Table ===== */
+#statusFilter {
+    width: 250px !important; 
+}
+
 .customer-table {
     margin-bottom: 0;
     font-size: 0.95rem;

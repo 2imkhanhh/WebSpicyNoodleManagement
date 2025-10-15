@@ -263,5 +263,19 @@ class Account {
             return false;
         }
     }
+
+    public function searchCustomers($search) {
+        $search = "%{$search}%";
+        $query = "SELECT a.account_id, a.name, a.email, a.phone, a.status 
+                  FROM {$this->table} a 
+                  JOIN customers c ON a.account_id = c.account_id 
+                  WHERE a.role = 0 
+                  AND (a.name LIKE :search OR a.email LIKE :search OR a.phone LIKE :search)
+                  ORDER BY a.account_id DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":search", $search, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

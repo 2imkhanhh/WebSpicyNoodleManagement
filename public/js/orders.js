@@ -352,7 +352,7 @@ async function loadEditAvailableTables(selectId, currentTableId) {
             const currentTable = currentTableData.data[0];
             const currentOption = document.createElement('option');
             currentOption.value = currentTable.table_id;
-            currentOption.textContent = `Bàn ${currentTable.name} (Sức chứa: ${currentTable.quantity}) - HIỆN TẠI`;
+            currentOption.textContent = `Bàn ${currentTable.name} (Sức chứa: ${currentTable.quantity}) - Hiện tại`;
             currentOption.selected = true; // Mặc định chọn bàn hiện tại
             select.appendChild(currentOption);
         }

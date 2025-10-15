@@ -199,5 +199,27 @@ class AccountController {
         $customers = $this->account->getCustomers();
         return array("message" => "Danh sách khách hàng", "success" => true, "status" => 200, "data" => $customers);
     }
+
+    public function searchCustomers($search) {
+        if ($_SERVER['REQUEST_METHOD'] != "GET") {
+            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+        }
+
+        $customers = $this->account->searchCustomers($search);
+        if (empty($customers)) {
+            return array(
+                "message" => "Không tìm thấy khách hàng khớp với từ khóa '$search'.",
+                "success" => true,
+                "status" => 200,
+                "data" => []
+            );
+        }
+        return array(
+            "message" => "Kết quả tìm kiếm khách hàng",
+            "success" => true,
+            "status" => 200,
+            "data" => $customers
+        );
+    }
 }
 ?>

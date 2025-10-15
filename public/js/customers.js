@@ -2,53 +2,72 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCustomers();
 });
 
-async function loadCustomers() {
+async function loadCustomers(search = '') {
     try {
-        // Gọi API với role=0 để chỉ lấy khách hàng
-        const response = await fetch('http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0', {
-            method: 'GET'
+        // Hiển thị loading spinner
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        if (loadingSpinner) loadingSpinner.classList.remove('d-none');
+
+        // Gọi API với role=0 và tham số search (nếu có)
+        const url = search 
+            ? `http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${encodeURIComponent(search)}`
+            : 'http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0';
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include' // Thêm để gửi cookie nếu cần xác thực
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (data.success) {
-            const customerTableBody = document.getElementById('customerTableBody');
-            if (!customerTableBody) {
-                // Tạo bảng nếu chưa có
-                const customerTableContainer = document.querySelector('.customer-table-container');
-                customerTableContainer.innerHTML = `
-                    <table class="table table-hover">
-                        <thead>
+        // Ẩn loading spinner
+        if (loadingSpinner) loadingSpinner.classList.add('d-none');
+
+        const customerTableBody = document.getElementById('customerTableBody');
+        if (!customerTableBody) {
+            // Tạo bảng nếu chưa có
+            const customerTableContainer = document.querySelector('.customer-table-container');
+            customerTableContainer.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-hover customer-table" id="customerTable">
+                        <thead class="table-header">
                             <tr>
-                                <th>STT</th>
+                                <th class="text-center" style="width: 60px;">STT</th>
                                 <th>Tên khách hàng</th>
                                 <th>Email</th>
                                 <th>Số điện thoại</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
+                                <th class="text-center" style="width: 120px;">Trạng thái</th>
+                                <th class="text-center" style="width: 150px;">Hành động</th>
                             </tr>
                         </thead>
                         <tbody id="customerTableBody"></tbody>
                     </table>
-                `;
-            }
+                </div>
+            `;
+        }
 
-            const tableBody = document.getElementById('customerTableBody');
-            tableBody.innerHTML = ''; // Clear existing data
+        const tableBody = document.getElementById('customerTableBody');
+        tableBody.innerHTML = ''; // Xóa dữ liệu cũ
 
+        if (data.success && data.data.length > 0) {
             data.data.forEach((customer, index) => {
                 const row = document.createElement('tr');
                 const statusText = parseInt(customer.status) === 1 ? 'Hoạt động' : 'Khóa';
                 row.innerHTML = `
-                    <td>${index + 1}</td>
+                    <td class="text-center">${index + 1}</td>
                     <td>${customer.name}</td>
                     <td>${customer.email || 'N/A'}</td>
                     <td>${customer.phone}</td>
-                    <td>
-                        <span class="badge ${parseInt(customer.status) === 1 ? 'bg-success' : 'bg-danger'}">
+                    <td class="text-center">
+                        <span class="badge ${parseInt(customer.status) === 1 ? 'status-active' : 'status-inactive'}">
                             ${statusText}
                         </span>
                     </td>
-                    <td>
+                    <td class="text-center">
                         <button class="btn btn-view btn-sm view-customer-btn" data-id="${customer.account_id}">
                             <i class="fas fa-eye"></i> Xem
                         </button>
@@ -61,13 +80,28 @@ async function loadCustomers() {
             document.querySelectorAll('.view-customer-btn').forEach(button => {
                 button.addEventListener('click', viewCustomerDetails);
             });
-
         } else {
-            alert('Lỗi: ' + data.message);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fas fa-users fa-3x mb-3 opacity-50"></i>
+                        <p>Không tìm thấy khách hàng.</p>
+                    </td>
+                </tr>
+            `;
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Lỗi kết nối: ' + error.message);
+        const tableBody = document.getElementById('customerTableBody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3 text-danger"></i>
+                    <p>Lỗi tải danh sách khách hàng: ${error.message}</p>
+                </td>
+            </tr>
+        `;
+        if (loadingSpinner) loadingSpinner.classList.add('d-none');
     }
 }
 
@@ -76,19 +110,32 @@ async function viewCustomerDetails(event) {
     
     try {
         const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?id=${customerId}`, {
-            method: 'GET'
+            method: 'GET',
+            credentials: 'include' // Thêm để gửi cookie nếu cần xác thực
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         
         if (data.success && data.data.length > 0) {
             const customer = data.data[0];
             // Hiển thị thông tin trong modal
-            document.getElementById('customerName').textContent = customer.name;
-            document.getElementById('customerEmail').textContent = customer.email || 'N/A';
-            document.getElementById('customerPhone').textContent = customer.phone;
-            document.getElementById('customerStatus').textContent = parseInt(customer.status) === 1 ? 'Hoạt động' : 'Khóa';
+            document.getElementById('modalCustomerName').textContent = customer.name;
+            document.getElementById('modalCustomerEmail').textContent = customer.email || 'N/A';
+            document.getElementById('modalCustomerPhone').textContent = customer.phone;
+            document.getElementById('modalCustomerStatus').textContent = parseInt(customer.status) === 1 ? 'Hoạt động' : 'Khóa';
+            document.getElementById('modalCustomerStatus').className = `badge fs-6 ${parseInt(customer.status) === 1 ? 'status-active' : 'status-inactive'}`;
+            
+            // Cập nhật thanh tiến trình (giả lập, nếu cần dữ liệu thực thì thêm vào API)
+            document.getElementById('customerActivity').style.width = parseInt(customer.status) === 1 ? '100%' : '0%';
+            document.getElementById('lastActivity').textContent = 'Chưa có dữ liệu'; // Cập nhật sau nếu có API
             
             new bootstrap.Modal(document.getElementById('customerDetailModal')).show();
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không tìm thấy khách hàng'));
         }
     } catch (error) {
         alert('Lỗi tải thông tin khách hàng: ' + error.message);
@@ -97,29 +144,27 @@ async function viewCustomerDetails(event) {
 
 // Tìm kiếm khách hàng
 function filterCustomers() {
-    const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase().trim();
-    const rows = document.querySelectorAll('#customerTableBody tr');
+    const searchTerm = document.getElementById('customerSearch')?.value.trim();
+    
+    // Gọi lại loadCustomers với tham số tìm kiếm
+    loadCustomers(searchTerm);
+}
 
-    if (!searchTerm) {
-        rows.forEach(row => row.style.display = '');
-        return;
-    }
-
-    rows.forEach(row => {
-        const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-        const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-        const phone = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-        
-        const match = name.includes(searchTerm) || 
-                     email.includes(searchTerm) || 
-                     phone.includes(searchTerm);
-                     
-        row.style.display = match ? '' : 'none';
+// Event listener cho tìm kiếm
+const customerSearch = document.getElementById('customerSearch');
+if (customerSearch) {
+    customerSearch.addEventListener('input', () => {
+        // Debounce để tránh gọi API quá nhiều
+        clearTimeout(customerSearch.dataset.timeout);
+        customerSearch.dataset.timeout = setTimeout(filterCustomers, 300);
     });
 }
 
-// Event listener cho tìm kiếm (nếu có input search)
-const customerSearch = document.getElementById('customerSearch');
-if (customerSearch) {
-    customerSearch.addEventListener('keyup', filterCustomers);
+// Event listener cho lọc trạng thái
+const statusFilter = document.getElementById('statusFilter');
+if (statusFilter) {
+    statusFilter.addEventListener('change', () => {
+        const searchTerm = document.getElementById('customerSearch')?.value.trim() || '';
+        loadCustomers(searchTerm); // Gọi lại để cập nhật danh sách (có thể kết hợp với trạng thái sau)
+    });
 }
