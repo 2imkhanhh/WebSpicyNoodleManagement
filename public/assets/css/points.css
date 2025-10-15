@@ -1,83 +1,169 @@
 .points-management {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
 }
 
-.category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.category-card {
+.card {
     background: white;
-    padding: 1.5rem;
     border: 1px solid #D68C45;
     border-radius: 10px;
-    text-align: center;
-    transition: transform 0.2s;
+    padding: 1.5rem;
+    transition: box-shadow 0.3s ease;
 }
 
-.category-card:hover {
-    transform: translateY(-5px);
+.card:hover {
+    box-shadow: 0 6px 12px rgba(184, 92, 56, 0.2);
 }
 
-.category-card h5 {
+.card h5 {
     color: #B85C38;
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: 600;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #D68C45;
+    padding-bottom: 0.5rem;
 }
 
-.category-card .actions {
-    margin-top: 1rem;
-}
-
-.btn-action {
-    margin: 0 5px;
-    font-size: 0.9rem;
-}
-
-.modal-content {
-    border-radius: 10px;
-}
-
-.modal-header {
-    background-color: #B85C38;
-    color: white;
-}
-
-.modal-body .form-label {
+.form-label {
     color: #4A2C2A;
     font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
 }
 
-.modal-body .form-control {
-    border-color: #D68C45;
+.form-control {
+    border: 1px solid #D68C45;
     border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
-.modal-footer .btn-primary {
+.form-control:focus {
+    border-color: #B85C38;
+    box-shadow: 0 0 5px rgba(184, 92, 56, 0.3);
+    outline: none;
+}
+
+.btn-primary {
     background-color: #B85C38;
     border: none;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
 }
 
-.modal-footer .btn-primary:hover {
+.btn-primary:hover {
     background-color: #8F4228;
 }
 
-.modal-footer .btn-secondary {
-    border-color: #D68C45;
+.mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+thead {
+    background-color: #F5E8E4;
+}
+
+th {
     color: #4A2C2A;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid #D68C45;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    color: #4A2C2A;
+    font-size: 1rem;
+    border-bottom: 1px solid #EDEDED;
+}
+
+tr:hover {
+    background-color: #FFF8F5;
+}
+
+.btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 5px;
+}
+
+.btn-warning {
+    background-color: #FFC107;
+    border: none;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #FFB300;
+}
+
+.btn-danger {
+    background-color: #DC3545;
+    border: none;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #C82333;
+}
+
+h6 {
+    color: #B85C38;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #D68C45;
+    padding-bottom: 0.25rem;
 }
 
 @media (max-width: 768px) {
-    .category-grid {
-        grid-template-columns: 1fr;
-    }
-    .category-card {
+    .points-management {
         padding: 1rem;
+    }
+
+    .card {
+        margin-bottom: 1.5rem;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-6 {
+        width: 100%;
+    }
+
+    th, td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    h6 {
+        font-size: 1rem;
+    }
+
+    .card h5 {
+        font-size: 1.2rem;
     }
 }

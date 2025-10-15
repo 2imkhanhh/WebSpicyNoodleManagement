@@ -53,171 +53,87 @@
                     </div>
                 </div>
             </header>
-            <div class="container">
-                <div class="mb-3">
-                    <button class="btn btn-primary" onclick="openModal('addPointRuleModal')">Thêm quy định tích điểm</button>
-                    <button class="btn btn-success ms-2" onclick="openModal('addVoucherRuleModal')">Thêm quy định voucher</button>
+            <div class="points-management mt-5">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card p-4">
+                            <h5>Quy định tích điểm</h5>
+                            <form id="pointsRuleForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Số tiền tối thiểu (VNĐ)</label>
+                                    <input type="number" step="0.01" class="form-control" id="minAmount" placeholder="Nhập số tiền tối thiểu">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số tiền tối đa (VNĐ, để trống nếu không giới hạn)</label>
+                                    <input type="number" step="0.01" class="form-control" id="maxAmount" placeholder="Nhập số tiền tối đa">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số điểm tích được</label>
+                                    <input type="number" class="form-control" id="pointsEarned" placeholder="Nhập số điểm">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-4">
+                            <h5>Quy định đổi voucher</h5>
+                            <form id="voucherRuleForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Số điểm cần đổi</label>
+                                    <input type="number" class="form-control" id="pointRequire" placeholder="Nhập số điểm">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phần trăm giảm giá (%)</label>
+                                    <input type="number" class="form-control" id="discountPercent" min="1" max="100" placeholder="Nhập % giảm giá">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mã voucher</label>
+                                    <input type="text" class="form-control" id="voucherCode" placeholder="Nhập mã voucher">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="category-grid" id="pointsGrid"></div>
-                <div class="category-grid mt-4" id="vouchersGrid"></div>
+                <div class="mt-4">
+                    <h6>Quy định tích điểm</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Số tiền tối thiểu (VNĐ)</th>
+                                <th>Số tiền tối đa (VNĐ)</th>
+                                <th>Điểm tích</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pointsTable"></tbody>
+                    </table>
+                    <h6 class="mt-4">Quy định voucher</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Số điểm cần</th>
+                                <th>Giảm giá (%)</th>
+                                <th>Mã voucher</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucherTable"></tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal Thêm Quy định Tích Điểm -->
-    <div class="modal fade" id="addPointRuleModal" tabindex="-1" aria-labelledby="addPointRuleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addPointRuleModalLabel">Thêm quy định tích điểm</h5>
-                    <button type="button" class="btn-close" onclick="closeModal('addPointRuleModal')"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addPointRuleForm" class="custom-form">
-                        <div class="form-group">
-                            <label for="minAmount">Số tiền tối thiểu (VNĐ)</label>
-                            <input type="number" step="0.01" id="minAmount" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="maxAmount">Số tiền tối đa (VNĐ, để trống nếu không giới hạn)</label>
-                            <input type="number" step="0.01" id="maxAmount">
-                        </div>
-                        <div class="form-group">
-                            <label for="pointsEarned">Số điểm tích được</label>
-                            <input type="number" id="pointsEarned" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addPointRuleModal')">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="savePointRuleBtn">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Thêm Quy định Voucher -->
-    <div class="modal fade" id="addVoucherRuleModal" tabindex="-1" aria-labelledby="addVoucherRuleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addVoucherRuleModalLabel">Thêm quy định voucher</h5>
-                    <button type="button" class="btn-close" onclick="closeModal('addVoucherRuleModal')"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addVoucherRuleForm" class="custom-form">
-                        <div class="form-group">
-                            <label for="voucherCode">Mã voucher</label>
-                            <input type="text" id="voucherCode" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pointRequire">Số điểm cần đổi</label>
-                            <input type="number" id="pointRequire" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="discountPercent">Phần trăm giảm giá (%)</label>
-                            <input type="number" id="discountPercent" required min="1" max="100">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addVoucherRuleModal')">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="saveVoucherRuleBtn">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Sửa Quy định Tích Điểm -->
-    <div class="modal fade" id="editPointRuleModal" tabindex="-1" aria-labelledby="editPointRuleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editPointRuleModalLabel">Sửa quy định tích điểm</h5>
-                    <button type="button" class="btn-close" onclick="closeModal('editPointRuleModal')"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editPointRuleForm" class="custom-form">
-                        <input type="hidden" id="editRuleId">
-                        <div class="form-group">
-                            <label for="editMinAmount">Số tiền tối thiểu (VNĐ)</label>
-                            <input type="number" step="0.01" id="editMinAmount" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editMaxAmount">Số tiền tối đa (VNĐ, để trống nếu không giới hạn)</label>
-                            <input type="number" step="0.01" id="editMaxAmount">
-                        </div>
-                        <div class="form-group">
-                            <label for="editPointsEarned">Số điểm tích được</label>
-                            <input type="number" id="editPointsEarned" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editPointRuleModal')">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="saveEditPointRuleBtn">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Sửa Quy định Voucher -->
-    <div class="modal fade" id="editVoucherRuleModal" tabindex="-1" aria-labelledby="editVoucherRuleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editVoucherRuleModalLabel">Sửa quy định voucher</h5>
-                    <button type="button" class="btn-close" onclick="closeModal('editVoucherRuleModal')"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editVoucherRuleForm" class="custom-form">
-                        <input type="hidden" id="editVoucherId">
-                        <div class="form-group">
-                            <label for="editVoucherCode">Mã voucher</label>
-                            <input type="text" id="editVoucherCode" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editPointRequire">Số điểm cần đổi</label>
-                            <input type="number" id="editPointRequire" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editDiscountPercent">Phần trăm giảm giá (%)</label>
-                            <input type="number" id="editDiscountPercent" required min="1" max="100">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editVoucherRuleModal')">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="saveEditVoucherRuleBtn">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/points.js"></script>
-    <script src="../js/dashboard.js"></script>
     <script>
         function logout() {
             alert("Đăng xuất thành công!");
             window.location.href = "/SpicyNoodleProject/public/views/login.html";
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-            document.getElementById(modalId).style.display = 'block';
-            document.body.classList.add('modal-open');
-            let backdrop = document.createElement('div');
-            backdrop.classList.add('modal-backdrop', 'fade', 'show');
-            document.body.appendChild(backdrop);
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-            document.getElementById(modalId).style.display = 'none';
-            document.body.classList.remove('modal-open');
-            document.querySelector('.modal-backdrop').remove();
         }
     </script>
 </body>

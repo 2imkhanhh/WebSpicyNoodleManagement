@@ -2,16 +2,28 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPointsRules();
     loadVoucherRules();
 
-    document.getElementById('savePointRuleBtn').addEventListener('click', async () => {
-        const data = {
-            min_amount: parseFloat(document.getElementById('minAmount').value),
-            max_amount: document.getElementById('maxAmount').value ? parseFloat(document.getElementById('maxAmount').value) : null,
-            points_earned: parseInt(document.getElementById('pointsEarned').value)
-        };
-        if (isNaN(data.min_amount) || isNaN(data.points_earned)) {
-            alert('Vui lòng nhập số tiền và số điểm hợp lệ!');
+    // Xử lý form quy định tích điểm
+    document.getElementById('pointsRuleForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const minAmount = parseFloat(document.getElementById('minAmount').value);
+        const maxAmount = document.getElementById('maxAmount').value ? parseFloat(document.getElementById('maxAmount').value) : null;
+        const pointsEarned = parseInt(document.getElementById('pointsEarned').value);
+
+        if (isNaN(minAmount) || isNaN(pointsEarned)) {
+            alert('Vui lòng nhập số tiền tối thiểu và số điểm hợp lệ!');
             return;
         }
+        if (maxAmount !== null && minAmount >= maxAmount) {
+            alert('Số tiền tối thiểu phải nhỏ hơn số tiền tối đa!');
+            return;
+        }
+
+        const data = {
+            min_amount: minAmount,
+            max_amount: maxAmount,
+            points_earned: pointsEarned
+        };
+
         const response = await fetch('http://localhost:81/SpicyNoodleProject/api/point_rules.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -23,10 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         loadPointsRules();
-        closeModal('addPointRuleModal');
+        document.getElementById('pointsRuleForm').reset(); // Reset form sau khi thêm
     });
 
-    document.getElementById('saveVoucherRuleBtn').addEventListener('click', async () => {
+    // Xử lý form quy định voucher
+    document.getElementById('voucherRuleForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
         const data = {
             voucher_code: document.getElementById('voucherCode').value.trim(),
             point_require: parseInt(document.getElementById('pointRequire').value),
@@ -47,166 +61,182 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         loadVoucherRules();
-        closeModal('addVoucherRuleModal');
+        document.getElementById('voucherRuleForm').reset(); // Reset form sau khi thêm
     });
 
-    document.getElementById('saveEditPointRuleBtn').addEventListener('click', async () => {
-        const id = document.getElementById('editRuleId').value;
-        const data = {
-            min_amount: parseFloat(document.getElementById('editMinAmount').value),
-            max_amount: document.getElementById('editMaxAmount').value ? parseFloat(document.getElementById('editMaxAmount').value) : null,
-            points_earned: parseInt(document.getElementById('editPointsEarned').value)
-        };
-        if (isNaN(data.min_amount) || isNaN(data.points_earned)) {
-            alert('Vui lòng nhập số tiền và số điểm hợp lệ!');
+    // Load quy định tích điểm
+    async function loadPointsRules() {
+        const res = await fetch('http://localhost:81/SpicyNoodleProject/api/point_rules.php');
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', errorText);
             return;
         }
+        const result = await res.json();
+        const table = document.getElementById('pointsTable');
+        table.innerHTML = '';
+        result.data.forEach(rule => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${rule.min_amount?.toLocaleString('vi-VN') || 'N/A'} VNĐ</td>
+                <td>${rule.max_amount ? rule.max_amount.toLocaleString('vi-VN') : '∞'} VNĐ</td>
+                <td>${rule.points_earned || 'N/A'} điểm</td>
+                <td>
+                    <button class="btn btn-warning btn-sm edit-btn" data-id="${rule.rule_id}">Sửa</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletePointRule(${rule.rule_id})">Xóa</button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+
+        // Thêm sự kiện cho nút Sửa
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const id = button.getAttribute('data-id');
+                editPointRule(id);
+            });
+        });
+    }
+
+    // Load quy định voucher
+    async function loadVoucherRules() {
+        const res = await fetch('http://localhost:81/SpicyNoodleProject/api/voucher_rules.php');
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', errorText);
+            return;
+        }
+        const result = await res.json();
+        const table = document.getElementById('voucherTable');
+        table.innerHTML = '';
+        result.data.forEach(rule => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${rule.points_require || 'N/A'} điểm</td>
+                <td>${rule.discount_percent || 'N/A'}%</td>
+                <td>${rule.voucher_code || 'N/A'}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm edit-btn" data-id="${rule.voucher_id}">Sửa</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteVoucherRule(${rule.voucher_id})">Xóa</button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+
+        // Thêm sự kiện cho nút Sửa
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const id = button.getAttribute('data-id');
+                editVoucherRule(id);
+            });
+        });
+    }
+
+    // Sửa quy định tích điểm
+    async function editPointRule(id) {
+        const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php?id=${id}`);
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', errorText);
+            return;
+        }
+        const result = await res.json();
+        const rule = result.data;
+
+        document.getElementById('minAmount').value = rule.min_amount || '';
+        document.getElementById('maxAmount').value = rule.max_amount || '';
+        document.getElementById('pointsEarned').value = rule.points_earned || '';
+
+        // Kiểm tra minAmount < maxAmount khi sửa
+        const minAmount = parseFloat(document.getElementById('minAmount').value);
+        const maxAmount = document.getElementById('maxAmount').value ? parseFloat(document.getElementById('maxAmount').value) : null;
+        if (maxAmount !== null && minAmount >= maxAmount) {
+            alert('Số tiền tối thiểu phải nhỏ hơn số tiền tối đa!');
+            return;
+        }
+
         const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php?id=${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                min_amount: minAmount,
+                max_amount: maxAmount,
+                points_earned: parseInt(document.getElementById('pointsEarned').value)
+            })
         });
-        const result = await response.json();
+        const resultUpdate = await response.json();
         if (!response.ok) {
-            alert(result.message || 'Có lỗi xảy ra!');
+            alert(resultUpdate.message || 'Có lỗi xảy ra!');
             return;
         }
         loadPointsRules();
-        closeModal('editPointRuleModal');
-    });
+    }
 
-    document.getElementById('saveEditVoucherRuleBtn').addEventListener('click', async () => {
-        const id = document.getElementById('editVoucherId').value;
+    // Xóa quy định tích điểm
+    async function deletePointRule(id) {
+        if (confirm('Bạn có chắc muốn xóa quy định này?')) {
+            const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php?id=${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return;
+            }
+            loadPointsRules();
+        }
+    }
+
+    // Sửa quy định voucher
+    async function editVoucherRule(id) {
+        const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/voucher_rules.php?id=${id}`);
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('API Error:', errorText);
+            return;
+        }
+        const result = await res.json();
+        const rule = result.data;
+
+        document.getElementById('pointRequire').value = rule.point_require || '';
+        document.getElementById('discountPercent').value = rule.discount_percent || '';
+        document.getElementById('voucherCode').value = rule.voucher_code || '';
+
         const data = {
-            voucher_code: document.getElementById('editVoucherCode').value.trim(),
-            point_require: parseInt(document.getElementById('editPointRequire').value),
-            discount_percent: parseInt(document.getElementById('editDiscountPercent').value)
+            voucher_code: document.getElementById('voucherCode').value.trim(),
+            point_require: parseInt(document.getElementById('pointRequire').value),
+            discount_percent: parseInt(document.getElementById('discountPercent').value)
         };
         if (!data.voucher_code || isNaN(data.point_require) || isNaN(data.discount_percent) || data.discount_percent < 1 || data.discount_percent > 100) {
             alert('Vui lòng điền đầy đủ thông tin hợp lệ (mã voucher, số điểm, và phần trăm giảm từ 1-100)!');
             return;
         }
+
         const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/voucher_rules.php?id=${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        const result = await response.json();
+        const resultUpdate = await response.json();
         if (!response.ok) {
-            alert(result.message || 'Có lỗi xảy ra!');
+            alert(resultUpdate.message || 'Có lỗi xảy ra!');
             return;
         }
         loadVoucherRules();
-        closeModal('editVoucherRuleModal');
-    });
+    }
+
+    // Xóa quy định voucher
+    async function deleteVoucherRule(id) {
+        if (confirm('Bạn có chắc muốn xóa voucher này?')) {
+            const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/voucher_rules.php?id=${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return;
+            }
+            loadVoucherRules();
+        }
+    }
 });
-
-async function loadPointsRules() {
-    const res = await fetch('http://localhost:81/SpicyNoodleProject/api/point_rules.php');
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', errorText);
-        return;
-    }
-    const result = await res.json();
-    const grid = document.getElementById('pointsGrid');
-    grid.innerHTML = '';
-    result.data.forEach(rule => {
-        const card = document.createElement('div');
-        card.className = 'category-card';
-        card.innerHTML = `
-            <h5>Mức: ${rule.min_amount.toLocaleString('vi-VN')} - ${rule.max_amount ? rule.max_amount.toLocaleString('vi-VN') : '∞'} VNĐ</h5>
-            <p>Điểm: ${rule.points_earned} điểm</p>
-            <div class="actions">
-                <button class="btn btn-warning btn-sm btn-action" onclick="editPointRule(${rule.rule_id})">Sửa</button>
-                <button class="btn btn-danger btn-sm btn-action" onclick="deletePointRule(${rule.rule_id})">Xóa</button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-async function loadVoucherRules() {
-    const res = await fetch('http://localhost:81/SpicyNoodleProject/api/voucher_rules.php');
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', errorText);
-        return;
-    }
-    const result = await res.json();
-    const grid = document.getElementById('vouchersGrid');
-    grid.innerHTML = '';
-    result.data.forEach(rule => {
-        const card = document.createElement('div');
-        card.className = 'category-card';
-        card.innerHTML = `
-            <h5>Mã: ${rule.voucher_code}</h5>
-            <p>Điểm: ${rule.points_require} - Giảm: ${rule.discount_percent}%</p>
-            <div class="actions">
-                <button class="btn btn-warning btn-sm btn-action" onclick="editVoucherRule(${rule.voucher_id})">Sửa</button>
-                <button class="btn btn-danger btn-sm btn-action" onclick="deleteVoucherRule(${rule.voucher_id})">Xóa</button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-async function editPointRule(id) {
-    const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php?id=${id}`);
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', errorText);
-        return;
-    }
-    const result = await res.json();
-    const rule = result.data;
-    document.getElementById('editRuleId').value = id;
-    document.getElementById('editMinAmount').value = rule.min_amount;
-    document.getElementById('editMaxAmount').value = rule.max_amount || '';
-    document.getElementById('editPointsEarned').value = rule.points_earned;
-    openModal('editPointRuleModal');
-}
-
-async function deletePointRule(id) {
-    if (confirm('Bạn có chắc muốn xóa quy định này?')) {
-        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php?id=${id}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error:', errorText);
-            return;
-        }
-        loadPointsRules();
-    }
-}
-
-async function editVoucherRule(id) {
-    const res = await fetch(`http://localhost:81/SpicyNoodleProject/api/voucher_rules.php?id=${id}`);
-    if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', errorText);
-        return;
-    }
-    const result = await res.json();
-    const rule = result.data;
-    document.getElementById('editVoucherId').value = id;
-    document.getElementById('editVoucherCode').value = rule.voucher_code;
-    document.getElementById('editPointRequire').value = rule.point_require;
-    document.getElementById('editDiscountPercent').value = rule.discount_percent;
-    openModal('editVoucherRuleModal');
-}
-
-async function deleteVoucherRule(id) {
-    if (confirm('Bạn có chắc muốn xóa voucher này?')) {
-        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/voucher_rules.php?id=${id}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error:', errorText);
-            return;
-        }
-        loadVoucherRules();
-    }
-}
