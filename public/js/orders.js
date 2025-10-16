@@ -148,7 +148,7 @@ async function loadOrders() {
                 console.log(order);
                 const row = document.createElement('tr');
                 
-                // Xác định nút action: ẨN NÚT SỬA/XÓA nếu đã thanh toán
+                // Xác định nút action: 
                 let actionButtons = '';
                 if (order.status !== 'paid') {
                     actionButtons = `
