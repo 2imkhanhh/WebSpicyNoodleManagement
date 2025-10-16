@@ -61,18 +61,21 @@ class AccountController {
             $_SESSION['user'] = [
                 "id" => $user["account_id"],
                 "name" => $user["name"],
-                "role" => $user["role"]
+                "role" => $user["role"],
+                "status" => $user["status"]
             ];
             Response::json([
+                "success" => true,
                 "message" => "Đăng nhập thành công!",
                 "user" => [
                     "id" => $user["account_id"],
                     "name" => $user["name"],
-                    "role" => $user["role"]
+                    "role" => $user["role"],
+                    "status" => $user["status"]
                 ]
             ]);
         } else {
-            Response::json(["message" => "Sai tài khoản hoặc mật khẩu!"], 401);
+            Response::json(["success" => false, "message" => "Sai tài khoản hoặc mật khẩu!"], 401);
         }
     }
 

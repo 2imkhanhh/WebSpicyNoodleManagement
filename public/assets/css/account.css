@@ -70,6 +70,13 @@
     height: 100%;
     overflow-y: auto;
 }
+.form-select{
+    border-radius: 10px;
+    border: 2px solid #D68C45;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
 
 .dashboard-header {
     display: flex;

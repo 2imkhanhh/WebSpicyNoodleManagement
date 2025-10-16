@@ -1,0 +1,197 @@
+.dashboard-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background: url('../images/spicy-noodle.jpg') no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    background: #B85C38; 
+    color: white;
+    padding: 2rem 1.5rem;
+    position: fixed;
+    height: 100%;
+    transition: transform 0.3s;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); 
+}
+
+.sidebar-logo {
+    width: 150px; 
+    height: auto;
+    margin-bottom: 0.75rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sidebar-header h3 {
+    font-size: 1.4rem; 
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: #F5E8C7; 
+    text-transform: uppercase; 
+}
+
+.sidebar-menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-menu ul li {
+    margin-bottom: 0.8rem; 
+}
+
+.sidebar-menu ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem; 
+    padding: 0.6rem 1rem;
+    display: block;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.sidebar-menu ul li a:hover,
+.sidebar-menu ul li a.active {
+    background-color: #D68C45; 
+    color: #333; 
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 2.5rem;
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.95); 
+    height: 100%;
+    overflow-y: auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #D68C45; 
+    padding-bottom: 0.5rem;
+}
+
+.dashboard-header h2 {
+    color: #B85C38;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.user-account {
+    display: flex;
+    align-items: center;
+}
+
+.user-name {
+    margin-right: 1.2rem;
+    color: #4A2C2A;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.dropdown-toggle {
+    background-color: #B85C38;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.dropdown-toggle:hover {
+    background-color: #8F4228;
+}
+
+.dropdown-menu {
+    background-color: #fff;
+    border: 1px solid #D68C45;
+    border-radius: 5px;
+    min-width: 150px;
+}
+
+.dropdown-item {
+    color: #4A2C2A;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-item:hover {
+    background-color: #F5E8C7; 
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: white;
+    padding: 1.8rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px); 
+}
+
+.card h4 {
+    color: #B85C38;
+    margin-bottom: 0.7rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.card-value {
+    font-size: 1.7rem;
+    color: #4A2C2A;
+    font-weight: 700;
+}
+
+.recent-activity h3 {
+    color: #B85C38;
+    margin-bottom: 1rem;
+}
+
+.list-group-item {
+    border-color: #D68C45;
+    color: #4A2C2A;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-250px);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .user-account {
+        margin-top: 1.5rem;
+    }
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+}
