@@ -15,7 +15,7 @@ async function loadCustomers(search = '') {
         
         const response = await fetch(url, {
             method: 'GET',
-            credentials: 'include' // Thêm để gửi cookie nếu cần xác thực
+            credentials: 'include'
         });
         
         if (!response.ok) {
@@ -129,10 +129,6 @@ async function viewCustomerDetails(event) {
             document.getElementById('modalCustomerPhone').textContent = customer.phone;
             document.getElementById('modalCustomerStatus').textContent = parseInt(customer.status) === 1 ? 'Hoạt động' : 'Khóa';
             document.getElementById('modalCustomerStatus').className = `badge fs-6 ${parseInt(customer.status) === 1 ? 'status-active' : 'status-inactive'}`;
-            
-            // Cập nhật thanh tiến trình (giả lập)
-            document.getElementById('customerActivity').style.width = parseInt(customer.status) === 1 ? '100%' : '0%';
-            document.getElementById('lastActivity').textContent = 'Chưa có dữ liệu';
 
             // Lấy lịch sử đơn hàng
             const orderResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_orders.php?account_id=${customerId}`, {
@@ -153,23 +149,39 @@ async function viewCustomerDetails(event) {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${order.order_id}</td>
-                        <td>${new Date(order.orderDate).toLocaleString('vi-VN', { dateStyle: 'short'})}</td>
+                        <td>${new Date(order.orderDate).toLocaleDateString('vi-VN', { dateStyle: 'short' })}</td>
                         <td>${parseFloat(order.totalPrice).toLocaleString('vi-VN')} VNĐ</td>
                         <td>
                             <span class="badge ${order.status === 'paid' ? 'status-active' : 'status-inactive'}">
                                 ${order.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                             </span>
                         </td>
+                        <td class="text-center">
+                            <button class="btn btn-view btn-sm view-order-details-btn" data-id="${order.order_id}">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </button>
+                        </td>
                     `;
                     orderHistory.appendChild(row);
+                });
+
+                // Thêm event listener cho nút xem chi tiết đơn hàng
+                document.querySelectorAll('.view-order-details-btn').forEach(button => {
+                    button.addEventListener('click', viewOrderDetails);
                 });
             } else {
                 orderHistory.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Không có đơn hàng nào</td>
+                        <td colspan="5" class="text-center text-muted">Không có đơn hàng nào</td>
                     </tr>
                 `;
             }
+
+            // Thêm event listener cho nút khóa/mở tài khoản
+            const toggleStatusButton = document.getElementById('toggleCustomerStatus');
+            toggleStatusButton.dataset.id = customerId; // Lưu account_id vào nút
+            toggleStatusButton.dataset.status = customer.status; // Lưu trạng thái hiện tại
+            toggleStatusButton.addEventListener('click', toggleCustomerStatus);
 
             // Hiển thị modal
             new bootstrap.Modal(document.getElementById('customerDetailModal')).show();
@@ -181,10 +193,108 @@ async function viewCustomerDetails(event) {
         const orderHistory = document.getElementById('orderHistory');
         orderHistory.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center text-danger">Lỗi tải lịch sử đơn hàng: ${error.message}</td>
+                <td colspan="5" class="text-center text-danger">Lỗi tải lịch sử đơn hàng: ${error.message}</td>
             </tr>
         `;
         new bootstrap.Modal(document.getElementById('customerDetailModal')).show();
+    }
+}
+
+async function viewOrderDetails(event) {
+    const orderId = event.target.closest('.view-order-details-btn').dataset.id;
+    
+    try {
+        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_order_details.php?order_id=${orderId}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const orderDetails = document.getElementById('orderDetails');
+        orderDetails.innerHTML = ''; // Xóa dữ liệu cũ
+
+        if (data.success && data.data.length > 0) {
+            data.data.forEach(detail => {
+                const row = document.createElement('tr');
+                const total = parseFloat(detail.price) * parseInt(detail.quantity);
+                row.innerHTML = `
+                    <td>${detail.food_id}</td>
+                    <td>${detail.name}</td>
+                    <td>${detail.quantity}</td>
+                    <td>${parseFloat(detail.price).toLocaleString('vi-VN')} VNĐ</td>
+                    <td>${total.toLocaleString('vi-VN')} VNĐ</td>
+                `;
+                orderDetails.appendChild(row);
+            });
+        } else {
+            orderDetails.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Không có chi tiết đơn hàng</td>
+                </tr>
+            `;
+        }
+
+        // Hiển thị modal chi tiết đơn hàng
+        new bootstrap.Modal(document.getElementById('orderDetailModal')).show();
+    } catch (error) {
+        console.error('Lỗi tải chi tiết đơn hàng:', error);
+        const orderDetails = document.getElementById('orderDetails');
+        orderDetails.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger">Lỗi tải chi tiết đơn hàng: ${error.message}</td>
+            </tr>
+        `;
+        new bootstrap.Modal(document.getElementById('orderDetailModal')).show();
+    }
+}
+
+async function toggleCustomerStatus(event) {
+    const button = event.target.closest('#toggleCustomerStatus');
+    const accountId = button.dataset.id;
+    const currentStatus = parseInt(button.dataset.status);
+    const newStatus = currentStatus === 1 ? 0 : 1;
+
+    try {
+        // Gửi yêu cầu POST đến update_account.php
+        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/update_account.php?id=${accountId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                name: document.getElementById('modalCustomerName').textContent,
+                email: document.getElementById('modalCustomerEmail').textContent === 'N/A' ? '' : document.getElementById('modalCustomerEmail').textContent,
+                phone: document.getElementById('modalCustomerPhone').textContent,
+                role: 0, // Giả định là khách hàng
+                status: newStatus
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.success) {
+            // Cập nhật trạng thái trên giao diện
+            document.getElementById('modalCustomerStatus').textContent = newStatus === 1 ? 'Hoạt động' : 'Khóa';
+            document.getElementById('modalCustomerStatus').className = `badge fs-6 ${newStatus === 1 ? 'status-active' : 'status-inactive'}`;
+            button.dataset.status = newStatus; // Cập nhật trạng thái trong nút
+            button.innerHTML = `<i class="fas fa-toggle-${newStatus === 1 ? 'on' : 'off'} me-1"></i>${newStatus === 1 ? 'Khóa' : 'Mở'} tài khoản`;
+
+            // Làm mới danh sách khách hàng
+            await loadCustomers(document.getElementById('customerSearch')?.value.trim() || '');
+        } else {
+            alert('Lỗi: ' + (result.message || 'Không thể cập nhật trạng thái tài khoản'));
+        }
+    } catch (error) {
+        console.error('Lỗi cập nhật trạng thái tài khoản:', error);
+        alert('Lỗi cập nhật trạng thái tài khoản: ' + error.message);
     }
 }
 

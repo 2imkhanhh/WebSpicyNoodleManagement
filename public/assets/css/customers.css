@@ -232,6 +232,10 @@
     display: flex;
 }
 
+.bg-primary{
+    background-color: #B85C38 !important;
+}
+
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .customer-table-container {
