@@ -23,7 +23,8 @@ class OrderController
             "orderDate" => $_POST['orderDate'] ?? '',
             "status" => 'unpaid',
             "tableID" => $_POST['tableID'] ?? '',
-            "items" => json_decode($_POST['items'] ?? '[]', true)
+            "items" => json_decode($_POST['items'] ?? '[]', true),
+            "account_id" => $_POST['account_id'] ?? null
         );
 
         if (empty($input_data['orderDate']) || empty($input_data['tableID']) || empty($input_data['items'])) {
@@ -39,6 +40,7 @@ class OrderController
         $this->order->totalPrice = $totalPrice;
         $this->order->status = $input_data['status'];
         $this->order->tableID = $input_data['tableID'];
+        $this->order->account_id = $input_data['account_id'];
 
         $order_id = $this->order->create();
         if ($order_id) {
@@ -63,10 +65,8 @@ class OrderController
 
         $input_data = json_decode(file_get_contents("php://input"), true) ?: $_POST;
         
-        // Kiểm tra và gán từng trường
         $hasChanges = false;
         
-        // Status - trường bắt buộc cho thanh toán
         if (isset($input_data['status'])) {
             $status = strtolower(htmlspecialchars(strip_tags($input_data['status'])));
             $validStatuses = ['paid', 'unpaid'];
@@ -77,7 +77,6 @@ class OrderController
             $hasChanges = true;
         }
         
-        // Các trường khác (tùy chọn)
         if (isset($input_data['orderDate']) && !empty($input_data['orderDate'])) {
             $this->order->orderDate = htmlspecialchars(strip_tags($input_data['orderDate']));
             $hasChanges = true;
@@ -93,7 +92,11 @@ class OrderController
             $hasChanges = true;
         }
         
-        // XỬ LÝ ITEMS - CHỈ KHI CÓ GỬI ITEMS
+        if (isset($input_data['account_id'])) {
+            $this->order->account_id = $input_data['account_id'] ? intval($input_data['account_id']) : null;
+            $hasChanges = true;
+        }
+        
         $itemsToUpdate = null;
         if (isset($input_data['items'])) {
             $items = is_string($input_data['items']) ? json_decode($input_data['items'], true) : $input_data['items'];
@@ -101,7 +104,6 @@ class OrderController
                 $itemsToUpdate = $items;
                 $hasChanges = true;
                 
-                // Tính totalPrice từ items nếu không có
                 if (!isset($input_data['totalPrice'])) {
                     $totalPrice = 0;
                     foreach ($items as $item) {
@@ -112,14 +114,11 @@ class OrderController
             }
         }
 
-        // Phải có ít nhất 1 thay đổi
         if (!$hasChanges) {
             return array("message" => "Không có trường nào để cập nhật.", "success" => false, "status" => 400);
         }
 
-        // Cập nhật thông tin chính
         if ($this->order->update($order_id)) {
-            // CHỈ XỬ LÝ ITEMS KHI CÓ itemsToUpdate
             if ($itemsToUpdate !== null) {
                 $this->order->updateDetails($order_id);
                 foreach ($itemsToUpdate as $item) {
@@ -139,24 +138,18 @@ class OrderController
         }
 
         $order_id = isset($_GET['id']) ? $_GET['id'] : null;
+        $account_id = isset($_GET['account_id']) ? $_GET['account_id'] : null;
 
-        // Query JOIN với bảng tablefood để lấy tên bàn
-        $query = "SELECT o.order_id, o.orderDate, o.totalPrice, o.status, o.tableID, t.name AS tableName
-                    FROM orders o
-                    LEFT JOIN tablefood t ON o.tableID = t.table_id";
         if ($order_id) {
-            $query .= " WHERE o.order_id = :order_id";
+            $orders = $this->order->get($order_id);
+            return array("message" => "Thông tin đơn hàng", "success" => true, "status" => 200, "data" => $orders);
+        } elseif ($account_id) {
+            $orders = $this->order->getByAccountId($account_id);
+            return array("message" => "Lịch sử đơn hàng", "success" => true, "status" => 200, "data" => $orders);
+        } else {
+            $orders = $this->order->get();
+            return array("message" => "Danh sách đơn hàng", "success" => true, "status" => 200, "data" => $orders);
         }
-        $query .= " ORDER BY o.orderDate DESC";
-
-        $stmt = $this->conn->prepare($query);
-        if ($order_id) {
-            $stmt->bindParam(":order_id", $order_id, PDO::PARAM_INT);
-        }
-        $stmt->execute();
-        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return array("message" => "Danh sách đơn hàng", "success" => true, "status" => 200, "data" => $orders);
     }
 
     public function getDetails()
@@ -191,3 +184,4 @@ class OrderController
         return array("message" => "Không thể xóa đơn hàng.", "success" => false, "status" => 400);
     }
 }
+?>

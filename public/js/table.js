@@ -64,7 +64,7 @@ async function addTable() {
 
     const tableNumber = document.getElementById('tableNumber').value;
     const tableCapacity = document.getElementById('tableCapacity').value;
-    const tableStatus = "Trống"; // Mặc định là "Trống"
+    const tableStatus = "Trống";
 
     try {
         const response = await fetch('http://localhost:81/SpicyNoodleProject/api/add_table.php', {
@@ -429,13 +429,16 @@ async function confirmPayment() {
             return;
         }
         
-        // 2. Cập nhật đơn hàng thành "paid"
+        // 2. Cập nhật đơn hàng: trạng thái "paid" và lưu account_id
         const updateOrderResponse = await fetch(
             `http://localhost:81/SpicyNoodleProject/api/update_order.php?id=${currentPaymentOrderId}`, 
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'paid' })
+                body: JSON.stringify({ 
+                    status: 'paid',
+                    account_id: accountId
+                })
             }
         );
         
@@ -463,23 +466,6 @@ async function confirmPayment() {
         
         if (!tableResult.success) {
             alert('Lỗi cập nhật bàn: ' + tableResult.message);
-            return;
-        }
-        
-        // 4. Cập nhật order_id vào bảng customers
-        const updateCustomerResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/update_customer.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                account_id: accountId,
-                order_id: currentPaymentOrderId
-            })
-        });
-        
-        const customerResult = await updateCustomerResponse.json();
-        
-        if (!customerResult.success) {
-            alert('Lỗi cập nhật thông tin khách hàng: ' + customerResult.message);
             return;
         }
         

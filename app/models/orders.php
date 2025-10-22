@@ -9,24 +9,27 @@ class Order {
     public $totalPrice;
     public $status;
     public $tableID;
+    public $account_id;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
     public function create() {
-        $query = "INSERT INTO " . $this->table_name . " (orderDate, totalPrice, status, tableID) VALUES (:orderDate, :totalPrice, :status, :tableID)";
+        $query = "INSERT INTO " . $this->table_name . " (orderDate, totalPrice, status, tableID, account_id) VALUES (:orderDate, :totalPrice, :status, :tableID, :account_id)";
         $stmt = $this->conn->prepare($query);
 
         $this->orderDate = htmlspecialchars(strip_tags($this->orderDate));
         $this->totalPrice = htmlspecialchars(strip_tags($this->totalPrice));
         $this->status = htmlspecialchars(strip_tags($this->status));
         $this->tableID = htmlspecialchars(strip_tags($this->tableID));
+        $this->account_id = $this->account_id ? htmlspecialchars(strip_tags($this->account_id)) : null;
 
         $stmt->bindParam(":orderDate", $this->orderDate);
         $stmt->bindParam(":totalPrice", $this->totalPrice);
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":tableID", $this->tableID, PDO::PARAM_INT);
+        $stmt->bindParam(":account_id", $this->account_id, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             return $this->conn->lastInsertId();
@@ -54,6 +57,10 @@ class Order {
             $setParts[] = "tableID = :tableID";
             $params[':tableID'] = $this->tableID;
         }
+        if (isset($this->account_id)) {
+            $setParts[] = "account_id = :account_id";
+            $params[':account_id'] = $this->account_id;
+        }
         
         if (empty($setParts)) {
             return false;
@@ -65,13 +72,11 @@ class Order {
     }
 
     public function updateDetails($order_id) {
-        // Xóa chi tiết cũ
         $deleteQuery = "DELETE FROM " . $this->details_table_name . " WHERE order_id = :order_id";
         $deleteStmt = $this->conn->prepare($deleteQuery);
         $deleteStmt->bindParam(":order_id", $order_id, PDO::PARAM_INT);
         $deleteStmt->execute();
 
-        // Thêm chi tiết mới (sẽ được gọi từ controller)
         return true;
     }
 
@@ -88,14 +93,27 @@ class Order {
     }
 
     public function get($order_id = null) {
-        $query = "SELECT order_id, orderDate, totalPrice, status, tableID FROM " . $this->table_name;
+        $query = "SELECT order_id, orderDate, totalPrice, status, tableID, account_id 
+                  FROM " . $this->table_name;
         if ($order_id) {
             $query .= " WHERE order_id = :order_id";
         }
+        $query .= " ORDER BY orderDate DESC";
         $stmt = $this->conn->prepare($query);
         if ($order_id) {
             $stmt->bindParam(":order_id", $order_id, PDO::PARAM_INT);
         }
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByAccountId($account_id) {
+        $query = "SELECT order_id, orderDate, totalPrice, status, tableID 
+                  FROM " . $this->table_name . " 
+                  WHERE account_id = :account_id 
+                  ORDER BY orderDate DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
