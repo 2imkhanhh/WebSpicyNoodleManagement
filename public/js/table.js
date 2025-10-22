@@ -282,19 +282,24 @@ async function openPaymentModal(tableId) {
                     document.getElementById('cashAmountDiv').style.display = 'block';
                     document.getElementById('confirmPaymentBtn').disabled = true;
                     document.getElementById('changeAmount').innerHTML = '';
-                    
-                    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
-                    modal.show();
+                    document.getElementById('customerPhone').value = '';
+                    document.getElementById('customerMessage').innerHTML = '';
                     
                     // Attach event listeners
                     const paymentMethodSelect = document.getElementById('paymentMethod');
                     const cashInput = document.getElementById('cashAmount');
+                    const phoneInput = document.getElementById('customerPhone');
                     
-                    paymentMethodSelect.removeEventListener('change', handlePaymentMethodChange); // Xóa cũ
-                    cashInput.removeEventListener('input', handleCashInput); // Xóa cũ
+                    paymentMethodSelect.removeEventListener('change', handlePaymentMethodChange);
+                    cashInput.removeEventListener('input', handleCashInput);
+                    phoneInput.removeEventListener('input', handlePhoneInput);
                     
                     paymentMethodSelect.addEventListener('change', handlePaymentMethodChange);
                     cashInput.addEventListener('input', handleCashInput);
+                    phoneInput.addEventListener('input', handlePhoneInput);
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                    modal.show();
                     
                 } else {
                     alert('Không tìm thấy đơn hàng cho bàn này');
@@ -324,11 +329,16 @@ function handlePaymentMethodChange(event) {
         cashInput.value = '';
         document.getElementById('changeAmount').innerHTML = '';
         
-        // Attach listener cho cash input
         cashInput.addEventListener('input', handleCashInput);
     } else {
         cashDiv.style.display = 'none';
-        confirmBtn.disabled = false;
+        // Chỉ bật nút thanh toán nếu số điện thoại hợp lệ
+        const phoneInput = document.getElementById('customerPhone').value;
+        if (phoneInput && phoneInput.match(/^\d{10}$/)) {
+            confirmBtn.disabled = false;
+        } else {
+            confirmBtn.disabled = true;
+        }
         
         const cashInput = document.getElementById('cashAmount');
         cashInput.removeEventListener('input', handleCashInput);
@@ -339,8 +349,7 @@ function handleCashInput(event) {
     const cashAmount = parseFloat(event.target.value.replace(/[^\d]/g, '')) || 0;
     const totalText = document.getElementById('paymentTotal').textContent;
     
-    // Parse tổng tiền chính xác
-    const totalTextClean = totalText.replace(/\D/g, ''); // Xoá mọi ký tự không phải số
+    const totalTextClean = totalText.replace(/\D/g, '');
     const total = parseFloat(totalTextClean) || 0;
     const change = cashAmount - total;
     
@@ -349,9 +358,50 @@ function handleCashInput(event) {
     
     if (change >= 0) {
         changeDiv.innerHTML = `<span class="text-success">Tiền thừa: ${change.toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = false;
+        // Chỉ bật nút thanh toán nếu số điện thoại hợp lệ
+        const phoneInput = document.getElementById('customerPhone').value;
+        if (phoneInput && phoneInput.match(/^\d{10}$/)) {
+            confirmBtn.disabled = false;
+        }
     } else {
         changeDiv.innerHTML = `<span class="text-danger">Thiếu: ${Math.abs(change).toLocaleString('vi-VN')} VNĐ</span>`;
+        confirmBtn.disabled = true;
+    }
+}
+
+async function handlePhoneInput(event) {
+    const phone = event.target.value;
+    const customerMessage = document.getElementById('customerMessage');
+    const confirmBtn = document.getElementById('confirmPaymentBtn');
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    
+    // Kiểm tra định dạng số điện thoại (10 chữ số)
+    if (!phone.match(/^\d{10}$/)) {
+        customerMessage.innerHTML = `<span class="text-danger">Vui lòng nhập số điện thoại hợp lệ (10 chữ số).</span>`;
+        confirmBtn.disabled = true;
+        return;
+    }
+    
+    try {
+        // Gọi API để kiểm tra khách hàng
+        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`, {
+            method: 'GET'
+        });
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+            customerMessage.innerHTML = `<span class="text-success">Khách hàng đã đăng ký.</span>`;
+            // Bật nút thanh toán nếu phương thức không phải tiền mặt hoặc số tiền đủ
+            if (paymentMethod !== 'cash' || (paymentMethod === 'cash' && parseFloat(document.getElementById('cashAmount').value) >= parseFloat(document.getElementById('paymentTotal').textContent.replace(/\D/g, '')))) {
+                confirmBtn.disabled = false;
+            }
+        } else {
+            customerMessage.innerHTML = `<span class="text-warning">Khách hàng chưa đăng ký. Vui lòng đăng ký để được tích điểm.</span>`;
+            confirmBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Lỗi kiểm tra khách hàng:', error);
+        customerMessage.innerHTML = `<span class="text-danger">Lỗi kiểm tra khách hàng: ${error.message}</span>`;
         confirmBtn.disabled = true;
     }
 }
@@ -400,7 +450,7 @@ async function confirmPayment() {
         if (tableResult.success) {
             alert(`Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : paymentMethod}!`);
             bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-            loadTables(); // Reload danh sách bàn
+            loadTables();
         } else {
             alert('Lỗi cập nhật bàn: ' + tableResult.message);
         }

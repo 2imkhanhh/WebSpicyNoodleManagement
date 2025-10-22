@@ -30,7 +30,6 @@
                     <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
                     <li><a href="points.html"><i class="fas fa-gift"></i> Quản lý tích điểm</a></li>
                     <li><a href="#"><i class="fas fa-users"></i>Quản lý nhân viên</a></li>
-                    <!-- <li><a href="#"><i class="fas fa-chart-bar"></i> Thống kê</a></li> -->
                 </ul>
             </nav>
         </aside>
@@ -78,7 +77,6 @@
                 </div>
             </div>
 
-            <!-- Modal Thêm bàn -->
             <div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -115,7 +113,6 @@
                 </div>
             </div>
 
-            <!-- Modal Sửa bàn -->
             <div class="modal fade" id="editTableModal" tabindex="-1" aria-labelledby="editTableModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -178,6 +175,12 @@
                             </div>
 
                             <div class="mt-3">
+                                <label for="customerPhone" class="form-label">Số điện thoại khách hàng:</label>
+                                <input type="text" class="form-control" id="customerPhone" placeholder="Nhập số điện thoại">
+                                <div id="customerMessage" class="mt-2"></div>
+                            </div>
+
+                            <div class="mt-3">
                                 <label for="paymentMethod" class="form-label">Phương thức thanh toán:</label>
                                 <select class="form-select" id="paymentMethod">
                                     <option value="cash">Tiền mặt</option>
@@ -212,3 +215,5 @@
             window.location.href = "/SpicyNoodleProject/public/views/login.html";
         }
     </script>
+</body>
+</html>

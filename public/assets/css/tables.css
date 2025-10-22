@@ -150,9 +150,25 @@
     color: #555;
 }
 
-b, strong{
+b, strong {
     font-family: monospace !important;
     font-weight: 700 !important;
+}
+
+#customerMessage {
+    font-size: 0.875rem;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
 }
 
 @media (max-width: 768px) {
@@ -179,5 +195,9 @@ b, strong{
 
     .modal-title {
         font-size: 1.1rem;
+    }
+
+    #customerMessage {
+        font-size: 0.8rem;
     }
 }
