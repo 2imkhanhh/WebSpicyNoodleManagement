@@ -109,36 +109,82 @@ async function viewCustomerDetails(event) {
     const customerId = event.target.closest('.view-customer-btn').dataset.id;
     
     try {
-        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?id=${customerId}`, {
+        // Lấy thông tin khách hàng
+        const customerResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?id=${customerId}`, {
             method: 'GET',
-            credentials: 'include' // Thêm để gửi cookie nếu cần xác thực
+            credentials: 'include'
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!customerResponse.ok) {
+            throw new Error(`HTTP error! status: ${customerResponse.status}`);
         }
 
-        const data = await response.json();
+        const customerData = await customerResponse.json();
         
-        if (data.success && data.data.length > 0) {
-            const customer = data.data[0];
-            // Hiển thị thông tin trong modal
+        if (customerData.success && customerData.data.length > 0) {
+            const customer = customerData.data[0];
+            // Hiển thị thông tin cơ bản
             document.getElementById('modalCustomerName').textContent = customer.name;
             document.getElementById('modalCustomerEmail').textContent = customer.email || 'N/A';
             document.getElementById('modalCustomerPhone').textContent = customer.phone;
             document.getElementById('modalCustomerStatus').textContent = parseInt(customer.status) === 1 ? 'Hoạt động' : 'Khóa';
             document.getElementById('modalCustomerStatus').className = `badge fs-6 ${parseInt(customer.status) === 1 ? 'status-active' : 'status-inactive'}`;
             
-            // Cập nhật thanh tiến trình (giả lập, nếu cần dữ liệu thực thì thêm vào API)
+            // Cập nhật thanh tiến trình (giả lập)
             document.getElementById('customerActivity').style.width = parseInt(customer.status) === 1 ? '100%' : '0%';
-            document.getElementById('lastActivity').textContent = 'Chưa có dữ liệu'; // Cập nhật sau nếu có API
-            
+            document.getElementById('lastActivity').textContent = 'Chưa có dữ liệu';
+
+            // Lấy lịch sử đơn hàng
+            const orderResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_orders.php?account_id=${customerId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!orderResponse.ok) {
+                throw new Error(`HTTP error! status: ${orderResponse.status}`);
+            }
+
+            const orderData = await orderResponse.json();
+            const orderHistory = document.getElementById('orderHistory');
+            orderHistory.innerHTML = ''; // Xóa dữ liệu cũ
+
+            if (orderData.success && orderData.data.length > 0) {
+                orderData.data.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.order_id}</td>
+                        <td>${new Date(order.orderDate).toLocaleString('vi-VN', { dateStyle: 'short'})}</td>
+                        <td>${parseFloat(order.totalPrice).toLocaleString('vi-VN')} VNĐ</td>
+                        <td>
+                            <span class="badge ${order.status === 'paid' ? 'status-active' : 'status-inactive'}">
+                                ${order.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                            </span>
+                        </td>
+                    `;
+                    orderHistory.appendChild(row);
+                });
+            } else {
+                orderHistory.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Không có đơn hàng nào</td>
+                    </tr>
+                `;
+            }
+
+            // Hiển thị modal
             new bootstrap.Modal(document.getElementById('customerDetailModal')).show();
         } else {
-            alert('Lỗi: ' + (data.message || 'Không tìm thấy khách hàng'));
+            alert('Lỗi: ' + (customerData.message || 'Không tìm thấy khách hàng'));
         }
     } catch (error) {
-        alert('Lỗi tải thông tin khách hàng: ' + error.message);
+        console.error('Lỗi tải thông tin khách hàng:', error);
+        const orderHistory = document.getElementById('orderHistory');
+        orderHistory.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center text-danger">Lỗi tải lịch sử đơn hàng: ${error.message}</td>
+            </tr>
+        `;
+        new bootstrap.Modal(document.getElementById('customerDetailModal')).show();
     }
 }
 
@@ -165,6 +211,6 @@ const statusFilter = document.getElementById('statusFilter');
 if (statusFilter) {
     statusFilter.addEventListener('change', () => {
         const searchTerm = document.getElementById('customerSearch')?.value.trim() || '';
-        loadCustomers(searchTerm); // Gọi lại để cập nhật danh sách (có thể kết hợp với trạng thái sau)
+        loadCustomers(searchTerm);
     });
 }
