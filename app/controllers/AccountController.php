@@ -13,9 +13,20 @@ class AccountController {
         $this->account = new Account($this->db);
     }
 
+    // Hàm kiểm tra số điện thoại
+    private function isValidPhoneNumber($phone) {
+        return preg_match('/^[0-9]{10}$/', $phone);
+    }
+
     public function register($data) {
         if (empty($data->phone) || empty($data->password) || empty($data->name)) {
             Response::json(["message" => "Vui lòng nhập đầy đủ thông tin!"], 400);
+            return;
+        }
+
+        // Kiểm tra số điện thoại
+        if (!$this->isValidPhoneNumber($data->phone)) {
+            Response::json(["message" => "Số điện thoại phải là số và có đúng 10 chữ số!"], 400);
             return;
         }
 
@@ -49,6 +60,7 @@ class AccountController {
     public function login($data) {
         if (empty($data->phone) || empty($data->password)) {
             Response::json(["message" => "Vui lòng nhập đầy đủ thông tin đăng nhập!"], 400);
+            return;
         }
 
         $this->account->phone = $data->phone;
@@ -124,6 +136,11 @@ class AccountController {
             return array("message" => "Tên, số điện thoại và mật khẩu không được để trống.", "success" => false, "status" => 400);
         }
 
+        // Kiểm tra số điện thoại
+        if (!$this->isValidPhoneNumber($input_data['phone'])) {
+            return array("message" => "Số điện thoại phải là số và có đúng 10 chữ số.", "success" => false, "status" => 400);
+        }
+
         $this->account->name = htmlspecialchars($input_data['name']);
         $this->account->email = htmlspecialchars($input_data['email']);
         $this->account->phone = htmlspecialchars($input_data['phone']);
@@ -161,6 +178,11 @@ class AccountController {
 
         if (empty($input_data['name']) || empty($input_data['phone'])) {
             return array("message" => "Tên và số điện thoại không được để trống.", "success" => false, "status" => 400);
+        }
+
+        // Kiểm tra số điện thoại
+        if (!$this->isValidPhoneNumber($input_data['phone'])) {
+            return array("message" => "Số điện thoại phải là số và có đúng 10 chữ số.", "success" => false, "status" => 400);
         }
 
         $this->account->account_id = $account_id;
