@@ -71,6 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         window.location.href = "/SpicyNoodleProject/public/views/customer_dashboard.html";
                     } else {
                         window.location.href = "/SpicyNoodleProject/public/views/dashboard.html";
+                        // Hạn chế giao diện cho nhân viên (role = 1)
+                        if (result.user.role == 1) {
+                            restrictStaffAccess();
+                        }
                     }
                 }
             } catch (err) {
@@ -81,6 +85,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 loginMessage.textContent = 'Lỗi kết nối server!';
             }
         });
+    }
+
+    // Hàm hạn chế truy cập cho nhân viên
+    function restrictStaffAccess() {
+        const restrictedMenus = [
+            'a[href="account.html"]',    
+            'a[href="customers.html"]',  
+            'a[href="points.html"]'      
+        ];
+        restrictedMenus.forEach(selector => {
+            const menuItems = document.querySelectorAll(selector);
+            menuItems.forEach(item => {
+                const parentLi = item.parentElement;
+                if (parentLi) {
+                    parentLi.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Kiểm tra vai trò ngay khi tải trang
+    const userRole = localStorage.getItem('userRole');
+    if (userRole == 1) {
+        restrictStaffAccess();
     }
 
     // Hàm đăng xuất
