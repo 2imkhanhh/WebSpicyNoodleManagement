@@ -210,6 +210,8 @@ document.getElementById('saveEditTableBtn').addEventListener('click', saveEditTa
 
 let currentPaymentTableId = null;
 let currentPaymentOrderId = null;
+let originalTotal = 0;
+let discountedTotal = 0;
 
 async function openPaymentModal(tableId) {
     try {
@@ -233,8 +235,10 @@ async function openPaymentModal(tableId) {
                 if (orderData.success && orderData.data.length > 0) {
                     const order = orderData.data[0];
                     
-                    const totalAmount = parseFloat(order.totalPrice);
-                    document.getElementById('paymentTotal').textContent = totalAmount.toLocaleString('vi-VN');
+                    originalTotal = parseFloat(order.totalPrice);
+                    discountedTotal = originalTotal;
+                    document.getElementById('paymentTotal').textContent = originalTotal.toLocaleString('vi-VN') + ' VNĐ';
+                    document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
                     
                     const detailsResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_order_details.php?order_id=${orderId}`);
                     const detailsData = await detailsResponse.json();
@@ -259,8 +263,11 @@ async function openPaymentModal(tableId) {
                             orderItemsDiv.appendChild(itemDiv);
                         });
                         
-                        if (calculatedTotal !== totalAmount) {
-                            document.getElementById('paymentTotal').textContent = calculatedTotal.toLocaleString('vi-VN');
+                        if (calculatedTotal !== originalTotal) {
+                            originalTotal = calculatedTotal;
+                            discountedTotal = calculatedTotal;
+                            document.getElementById('paymentTotal').textContent = originalTotal.toLocaleString('vi-VN') + ' VNĐ';
+                            document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
                         }
                     }
                     
@@ -269,22 +276,28 @@ async function openPaymentModal(tableId) {
                     document.getElementById('paymentMethod').value = 'cash';
                     document.getElementById('cashAmount').value = '';
                     document.getElementById('cashAmountDiv').style.display = 'block';
-                    document.getElementById('confirmPaymentBtn').disabled = false;
+                    document.getElementById('confirmPaymentBtn').disabled = true; // Vô hiệu hóa nút "Thanh toán" ban đầu
                     document.getElementById('changeAmount').innerHTML = '';
                     document.getElementById('customerPhone').value = '';
                     document.getElementById('customerMessage').innerHTML = '';
+                    document.getElementById('voucherSelect').innerHTML = '<option value="">Chọn voucher</option>';
                     
                     const paymentMethodSelect = document.getElementById('paymentMethod');
                     const cashInput = document.getElementById('cashAmount');
                     const phoneInput = document.getElementById('customerPhone');
+                    const voucherSelect = document.getElementById('voucherSelect');
                     
+                    // Xóa các event listener cũ để tránh trùng lặp
                     paymentMethodSelect.removeEventListener('change', handlePaymentMethodChange);
                     cashInput.removeEventListener('input', handleCashInput);
                     phoneInput.removeEventListener('input', handlePhoneInput);
+                    voucherSelect.removeEventListener('change', handleVoucherChange);
                     
+                    // Gắn các event listener mới
                     paymentMethodSelect.addEventListener('change', handlePaymentMethodChange);
                     cashInput.addEventListener('input', handleCashInput);
                     phoneInput.addEventListener('input', handlePhoneInput);
+                    voucherSelect.addEventListener('change', handleVoucherChange);
                     
                     const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
                     modal.show();
@@ -308,38 +321,34 @@ function handlePaymentMethodChange(event) {
     const method = event.target.value;
     const cashDiv = document.getElementById('cashAmountDiv');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
+    const cashInput = document.getElementById('cashAmount');
     
     if (method === 'cash') {
         cashDiv.style.display = 'block';
-        confirmBtn.disabled = true;
-        const cashInput = document.getElementById('cashAmount');
+        confirmBtn.disabled = true; // Vô hiệu hóa nút khi chọn tiền mặt
         cashInput.value = '';
         document.getElementById('changeAmount').innerHTML = '';
         cashInput.addEventListener('input', handleCashInput);
     } else {
         cashDiv.style.display = 'none';
-        confirmBtn.disabled = false;
-        const cashInput = document.getElementById('cashAmount');
+        confirmBtn.disabled = false; // Kích hoạt nút cho thẻ hoặc chuyển khoản
         cashInput.removeEventListener('input', handleCashInput);
     }
 }
 
 function handleCashInput(event) {
-    const cashAmount = parseFloat(event.target.value.replace(/[^\d]/g, '')) || 0;
-    const totalText = document.getElementById('paymentTotal').textContent;
-    const totalTextClean = totalText.replace(/\D/g, '');
-    const total = parseFloat(totalTextClean) || 0;
-    const change = cashAmount - total;
-    
-    const changeDiv = document.getElementById('changeAmount');
+    const cashAmount = parseFloat(event.target.value) || 0;
     const confirmBtn = document.getElementById('confirmPaymentBtn');
+    const changeDiv = document.getElementById('changeAmount');
     
-    if (change >= 0) {
+    const change = cashAmount - discountedTotal;
+    
+    if (cashAmount >= discountedTotal) {
         changeDiv.innerHTML = `<span class="text-success">Tiền thừa: ${change.toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = false;
+        confirmBtn.disabled = false; // Kích hoạt nút nếu số tiền hợp lệ
     } else {
         changeDiv.innerHTML = `<span class="text-danger">Thiếu: ${Math.abs(change).toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = true;
+        confirmBtn.disabled = true; // Vô hiệu hóa nếu số tiền không đủ
     }
 }
 
@@ -347,17 +356,24 @@ async function handlePhoneInput(event) {
     const phone = event.target.value;
     const customerMessage = document.getElementById('customerMessage');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
+    const voucherSelect = document.getElementById('voucherSelect');
     
     if (!phone) {
         customerMessage.innerHTML = '';
-        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash' && 
-                            parseFloat(document.getElementById('cashAmount').value || 0) < 
-                            parseFloat(document.getElementById('paymentTotal').textContent.replace(/\D/g, ''));
+        voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+        discountedTotal = originalTotal;
+        document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
+        // Cập nhật trạng thái nút dựa trên phương thức thanh toán
+        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
         return;
     }
     
     if (!phone.match(/^\d{10}$/)) {
         customerMessage.innerHTML = `<span class="text-danger">Vui lòng nhập số điện thoại hợp lệ (10 chữ số).</span>`;
+        voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+        discountedTotal = originalTotal;
+        document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
+        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
         return;
     }
     
@@ -378,23 +394,79 @@ async function handlePhoneInput(event) {
                 const points = customerData.data.points || 0;
                 const vouchers = customerData.data.vouchers || [];
                 let voucherText = '';
+                voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+                
                 if (vouchers.length > 0) {
                     voucherText = '<br>Có thể đổi:<br>' + vouchers.map(v => 
                         ` - ${v.voucher_code} (${v.discount_percent}% giảm, ${v.points_require} điểm)`
                     ).join('<br>');
+                    vouchers.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v.voucher_id;
+                        option.dataset.discount = v.discount_percent;
+                        option.dataset.points = v.points_require;
+                        option.textContent = `${v.voucher_code} (${v.discount_percent}% giảm, ${v.points_require} điểm)`;
+                        voucherSelect.appendChild(option);
+                    });
                 } else {
                     voucherText = '<br>Không có voucher nào đủ điều kiện đổi.';
                 }
                 customerMessage.innerHTML = `<span class="text-success">Khách hàng đã đăng ký. Số điểm: ${points}${voucherText}</span>`;
+                discountedTotal = originalTotal;
+                document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
             } else {
                 customerMessage.innerHTML = `<span class="text-warning">Không tìm thấy thông tin điểm của khách hàng.</span>`;
+                voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+                discountedTotal = originalTotal;
+                document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
             }
         } else {
             customerMessage.innerHTML = `<span class="text-warning">Khách hàng chưa đăng ký.</span>`;
+            voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+            discountedTotal = originalTotal;
+            document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
         }
+        // Cập nhật trạng thái nút sau khi xử lý số điện thoại
+        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
     } catch (error) {
         console.error('Lỗi kiểm tra khách hàng:', error);
         customerMessage.innerHTML = `<span class="text-danger">Lỗi kiểm tra khách hàng: ${error.message}</span>`;
+        voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
+        discountedTotal = originalTotal;
+        document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
+        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
+    }
+}
+
+function handleVoucherChange(event) {
+    const voucherId = event.target.value;
+    const discountPercent = parseFloat(event.target.selectedOptions[0].dataset.discount) || 0;
+    const confirmBtn = document.getElementById('confirmPaymentBtn');
+    const cashInput = document.getElementById('cashAmount');
+    
+    if (voucherId) {
+        discountedTotal = originalTotal * (1 - discountPercent / 100);
+    } else {
+        discountedTotal = originalTotal;
+    }
+    
+    document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
+    
+    // Cập nhật trạng thái nút sau khi thay đổi voucher
+    if (document.getElementById('paymentMethod').value === 'cash') {
+        const cashAmount = parseFloat(cashInput.value) || 0;
+        const change = cashAmount - discountedTotal;
+        const changeDiv = document.getElementById('changeAmount');
+        
+        if (cashAmount >= discountedTotal) {
+            changeDiv.innerHTML = `<span class="text-success">Tiền thừa: ${change.toLocaleString('vi-VN')} VNĐ</span>`;
+            confirmBtn.disabled = false;
+        } else {
+            changeDiv.innerHTML = `<span class="text-danger">Thiếu: ${Math.abs(change).toLocaleString('vi-VN')} VNĐ</span>`;
+            confirmBtn.disabled = true;
+        }
+    } else {
+        confirmBtn.disabled = false; // Kích hoạt nút cho thẻ hoặc chuyển khoản
     }
 }
 
@@ -406,15 +478,38 @@ async function confirmPayment() {
     
     const paymentMethod = document.getElementById('paymentMethod').value;
     const phone = document.getElementById('customerPhone').value;
+    const voucherSelect = document.getElementById('voucherSelect');
+    const voucherId = voucherSelect.value;
     
     try {
         let accountId = null;
+        let redeemResponse = null;
+        
         if (phone && phone.match(/^\d{10}$/)) {
             const accountResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`);
             const accountData = await accountResponse.json();
             
             if (accountData.success && accountData.data.length > 0) {
                 accountId = accountData.data[0].account_id;
+                
+                // Xử lý đổi voucher
+                if (voucherId) {
+                    redeemResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/redeem_voucher.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            account_id: accountId,
+                            voucher_id: voucherId,
+                            order_id: currentPaymentOrderId
+                        })
+                    });
+                    const redeemData = await redeemResponse.json();
+                    
+                    if (!redeemData.success) {
+                        alert('Lỗi đổi voucher: ' + redeemData.message);
+                        return;
+                    }
+                }
             }
         }
         
@@ -426,7 +521,9 @@ async function confirmPayment() {
                 credentials: 'include',
                 body: JSON.stringify({ 
                     status: 'paid',
-                    account_id: accountId
+                    account_id: accountId,
+                    total_price: discountedTotal,
+                    voucher_id: voucherId || null
                 })
             }
         );
@@ -458,7 +555,8 @@ async function confirmPayment() {
             return;
         }
         
-        alert(`Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : paymentMethod}!`);
+        alert(`Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : paymentMethod}!` + 
+              (voucherId ? `\nVoucher đã được áp dụng.` : ''));
         bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
         loadTables();
         

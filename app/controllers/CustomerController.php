@@ -77,5 +77,62 @@ class CustomerController {
             ]
         ];
     }
+
+    public function redeemVoucher() {
+        if ($_SERVER['REQUEST_METHOD'] != "POST") {
+            return ["message" => "Method not allowed.", "success" => false, "status" => 405];
+        }
+
+        $input_data = json_decode(file_get_contents("php://input"), true);
+        if (!$input_data) {
+            return ["message" => "Dữ liệu đầu vào không hợp lệ.", "success" => false, "status" => 400];
+        }
+
+        if (empty($input_data['account_id']) || empty($input_data['voucher_id']) || !isset($input_data['order_id'])) {
+            return ["message" => "Vui lòng cung cấp account_id, voucher_id và order_id.", "success" => false, "status" => 400];
+        }
+
+        $account_id = $input_data['account_id'];
+        $voucher_id = $input_data['voucher_id'];
+        $order_id = $input_data['order_id'];
+
+        // Kiểm tra khách hàng
+        $customer_data = $this->customer->getByAccountId($account_id);
+        if (!$customer_data) {
+            return ["message" => "Không tìm thấy khách hàng.", "success" => false, "status" => 404];
+        }
+
+        $customer_id = $customer_data['customer_id'];
+        $points = $customer_data['points'];
+
+        // Kiểm tra voucher
+        $vouchers = $this->customer->getAvailableVouchers($points);
+        $selected_voucher = null;
+        foreach ($vouchers as $voucher) {
+            if ($voucher['voucher_id'] == $voucher_id) {
+                $selected_voucher = $voucher;
+                break;
+            }
+        }
+
+        if (!$selected_voucher) {
+            return ["message" => "Voucher không hợp lệ hoặc không đủ điểm để đổi.", "success" => false, "status" => 400];
+        }
+
+        // Trừ điểm và ghi lịch sử
+        if ($this->customer->redeemPoints($customer_id, $selected_voucher['points_require'], $order_id)) {
+            return [
+                "message" => "Đổi voucher thành công.",
+                "success" => true,
+                "status" => 200,
+                "data" => [
+                    "new_points" => $points - $selected_voucher['points_require'],
+                    "voucher" => $selected_voucher
+                ]
+            ];
+        } else {
+            return ["message" => "Lỗi khi đổi voucher.", "success" => false, "status" => 500];
+        }
+    }
 }
 ?>

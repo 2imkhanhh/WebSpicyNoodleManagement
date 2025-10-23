@@ -3,6 +3,7 @@ class Customer {
     private $conn;
     private $table = "customers";
     private $voucher_table = "vouchers";
+    private $points_history_table = "points_history";
 
     public $customer_id;
     public $account_id;
@@ -181,6 +182,49 @@ class Customer {
         $stmt->bindParam(":points", $points, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Trừ điểm và ghi lịch sử đổi voucher
+    public function redeemPoints($customer_id, $points_require, $order_id = null) {
+        // Bắt đầu transaction
+        $this->conn->beginTransaction();
+
+        try {
+            // Lấy số điểm hiện tại
+            $customer = $this->getById($customer_id);
+            if (!$customer || $customer['points'] < $points_require) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            // Trừ điểm
+            $new_points = $customer['points'] - $points_require;
+            if (!$this->updatePoints($customer_id, $new_points)) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            // Ghi lịch sử điểm
+            $query = "INSERT INTO {$this->points_history_table} (customer_id, order_id, change_type, points_changed) 
+                      VALUES (:customer_id, :order_id, 'redeem', :points_changed)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":customer_id", $customer_id, PDO::PARAM_INT);
+            $stmt->bindParam(":order_id", $order_id, PDO::PARAM_INT, PDO::PARAM_NULL);
+            $stmt->bindParam(":points_changed", $points_require, PDO::PARAM_INT);
+            
+            if (!$stmt->execute()) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            // Commit transaction
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            error_log("Redeem points failed: " . $e->getMessage());
+            return false;
+        }
     }
 }
 ?>
