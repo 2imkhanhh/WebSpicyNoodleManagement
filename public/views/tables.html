@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/tables.css">
 </head>
+
 <body>
     <div class="dashboard-wrapper">
         <aside class="sidebar">
@@ -39,24 +41,31 @@
                 <div class="user-account">
                     <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
                     <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user me-1"></i>Tài khoản
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="account.html">
-                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
-                            </a></li>
+                            <li><a class="dropdown-item" href="infaccount.html">
+                                    <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                                </a></li>
                             <li><a class="dropdown-item" href="#" onclick="logout()">
-                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-                            </a></li>
+                                    <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                                </a></li>
                         </ul>
                     </div>
                 </div>
             </header>
             <div class="table-management">
-                <div class="mb-4">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTableModal">Thêm bàn mới</button>
+                <div class="mb-4 d-flex gap-2">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTableModal">
+                        <i class="fas fa-plus"></i> Thêm bàn mới
+                    </button>
+                    <a href="booking_admin.html" class="btn btn-success">
+                        <i class="fas fa-calendar-check"></i> Bàn đã đặt
+                    </a>
                 </div>
+
                 <div class="table-list">
                     <table class="table table-bordered table-hover">
                         <thead>
@@ -73,7 +82,8 @@
             </div>
 
             <!-- Modal Thêm Bàn -->
-            <div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+            <div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -88,7 +98,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="tableCapacity" class="form-label">Sức chứa</label>
-                                    <input type="number" class="form-control" id="tableCapacity" name="quantity" required>
+                                    <input type="number" class="form-control" id="tableCapacity" name="quantity"
+                                        required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="tableStatus" class="form-label">Trạng thái</label>
@@ -108,7 +119,8 @@
             </div>
 
             <!-- Modal Sửa Bàn -->
-            <div class="modal fade" id="editTableModal" tabindex="-1" aria-labelledby="editTableModalLabel" aria-hidden="true">
+            <div class="modal fade" id="editTableModal" tabindex="-1" aria-labelledby="editTableModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -124,7 +136,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTableCapacity" class="form-label">Sức chứa</label>
-                                    <input type="number" class="form-control" id="editTableCapacity" name="quantity" required>
+                                    <input type="number" class="form-control" id="editTableCapacity" name="quantity"
+                                        required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="editTableStatus" class="form-label">Trạng thái</label>
@@ -145,7 +158,8 @@
             </div>
 
             <!-- Modal Thanh Toán -->
-            <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+            <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -173,7 +187,8 @@
                             </div>
                             <div class="mt-3">
                                 <label for="customerPhone" class="form-label">Số điện thoại khách hàng:</label>
-                                <input type="text" class="form-control" id="customerPhone" placeholder="Nhập số điện thoại">
+                                <input type="text" class="form-control" id="customerPhone"
+                                    placeholder="Nhập số điện thoại">
                                 <div id="customerMessage" class="mt-2"></div>
                             </div>
                             <div class="mt-3">
@@ -198,7 +213,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn" disabled>Thanh toán</button>
+                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn" disabled>Thanh
+                                toán</button>
                         </div>
                     </div>
                 </div>
@@ -216,4 +232,5 @@
         }
     </script>
 </body>
+
 </html>
