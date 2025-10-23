@@ -93,12 +93,12 @@ class Order {
     }
 
     public function get($order_id = null) {
-        $query = "SELECT order_id, orderDate, totalPrice, status, tableID, account_id 
+        $query = "SELECT DISTINCT order_id, orderDate, totalPrice, status, tableID, account_id 
                   FROM " . $this->table_name;
         if ($order_id) {
             $query .= " WHERE order_id = :order_id";
         }
-        $query .= " ORDER BY orderDate DESC";
+        $query .= " ORDER BY order_id DESC";
         $stmt = $this->conn->prepare($query);
         if ($order_id) {
             $stmt->bindParam(":order_id", $order_id, PDO::PARAM_INT);
@@ -108,10 +108,10 @@ class Order {
     }
 
     public function getByAccountId($account_id) {
-        $query = "SELECT order_id, orderDate, totalPrice, status, tableID 
+        $query = "SELECT DISTINCT order_id, orderDate, totalPrice, status, tableID, account_id 
                   FROM " . $this->table_name . " 
                   WHERE account_id = :account_id 
-                  ORDER BY orderDate DESC";
+                  ORDER BY order_id DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":account_id", $account_id, PDO::PARAM_INT);
         $stmt->execute();

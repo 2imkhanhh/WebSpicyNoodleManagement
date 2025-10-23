@@ -137,9 +137,16 @@ class OrderController
             return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
-        $order_id = isset($_GET['id']) ? $_GET['id'] : null;
-        $account_id = isset($_GET['account_id']) ? $_GET['account_id'] : null;
-        $status = isset($_GET['status']) ? strtolower($_GET['status']) : null;
+        $order_id = isset($_GET['id']) ? trim($_GET['id']) : null;
+        $account_id = isset($_GET['account_id']) ? trim($_GET['account_id']) : null;
+        $status = isset($_GET['status']) ? strtolower(trim($_GET['status'])) : null;
+
+        if ($order_id && !is_numeric($order_id)) {
+            return array("message" => "ID đơn hàng không hợp lệ.", "success" => false, "status" => 400);
+        }
+        if ($account_id && !is_numeric($account_id)) {
+            return array("message" => "ID tài khoản không hợp lệ.", "success" => false, "status" => 400);
+        }
 
         if ($order_id) {
             $orders = $this->order->get($order_id);
@@ -165,7 +172,8 @@ class OrderController
             $order['tableName'] = $table ? $table['name'] : null;
 
             // Lấy phone từ bảng accounts
-            if ($order['account_id']) {
+            $order['account_id'] = isset($order['account_id']) ? $order['account_id'] : null; // Đảm bảo account_id luôn tồn tại
+            if (!empty($order['account_id'])) {
                 $account_query = "SELECT phone FROM accounts WHERE account_id = :account_id";
                 $account_stmt = $this->conn->prepare($account_query);
                 $account_stmt->bindParam(':account_id', $order['account_id'], PDO::PARAM_INT);
