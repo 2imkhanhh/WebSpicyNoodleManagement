@@ -7,7 +7,7 @@ class TableModel {
     public $name;
     public $quantity;
     public $status;
-    public $order_id; // Thêm property cho order_id
+    public $order_id; 
 
     public function __construct() {
         $database = new Database();

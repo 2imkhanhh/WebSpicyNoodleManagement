@@ -276,7 +276,7 @@ async function openPaymentModal(tableId) {
                     document.getElementById('paymentMethod').value = 'cash';
                     document.getElementById('cashAmount').value = '';
                     document.getElementById('cashAmountDiv').style.display = 'block';
-                    document.getElementById('confirmPaymentBtn').disabled = true; // Vô hiệu hóa nút "Thanh toán" ban đầu
+                    document.getElementById('confirmPaymentBtn').disabled = true;
                     document.getElementById('changeAmount').innerHTML = '';
                     document.getElementById('customerPhone').value = '';
                     document.getElementById('customerMessage').innerHTML = '';
@@ -287,13 +287,11 @@ async function openPaymentModal(tableId) {
                     const phoneInput = document.getElementById('customerPhone');
                     const voucherSelect = document.getElementById('voucherSelect');
                     
-                    // Xóa các event listener cũ để tránh trùng lặp
                     paymentMethodSelect.removeEventListener('change', handlePaymentMethodChange);
                     cashInput.removeEventListener('input', handleCashInput);
                     phoneInput.removeEventListener('input', handlePhoneInput);
                     voucherSelect.removeEventListener('change', handleVoucherChange);
                     
-                    // Gắn các event listener mới
                     paymentMethodSelect.addEventListener('change', handlePaymentMethodChange);
                     cashInput.addEventListener('input', handleCashInput);
                     phoneInput.addEventListener('input', handlePhoneInput);
@@ -325,13 +323,13 @@ function handlePaymentMethodChange(event) {
     
     if (method === 'cash') {
         cashDiv.style.display = 'block';
-        confirmBtn.disabled = true; // Vô hiệu hóa nút khi chọn tiền mặt
+        confirmBtn.disabled = true;
         cashInput.value = '';
         document.getElementById('changeAmount').innerHTML = '';
         cashInput.addEventListener('input', handleCashInput);
     } else {
         cashDiv.style.display = 'none';
-        confirmBtn.disabled = false; // Kích hoạt nút cho thẻ hoặc chuyển khoản
+        confirmBtn.disabled = false;
         cashInput.removeEventListener('input', handleCashInput);
     }
 }
@@ -345,10 +343,10 @@ function handleCashInput(event) {
     
     if (cashAmount >= discountedTotal) {
         changeDiv.innerHTML = `<span class="text-success">Tiền thừa: ${change.toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = false; // Kích hoạt nút nếu số tiền hợp lệ
+        confirmBtn.disabled = false;
     } else {
         changeDiv.innerHTML = `<span class="text-danger">Thiếu: ${Math.abs(change).toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = true; // Vô hiệu hóa nếu số tiền không đủ
+        confirmBtn.disabled = true;
     }
 }
 
@@ -363,7 +361,6 @@ async function handlePhoneInput(event) {
         voucherSelect.innerHTML = '<option value="">Chọn voucher</option>';
         discountedTotal = originalTotal;
         document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
-        // Cập nhật trạng thái nút dựa trên phương thức thanh toán
         confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
         return;
     }
@@ -381,14 +378,34 @@ async function handlePhoneInput(event) {
         const accountResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`, {
             method: 'GET'
         });
-        const accountData = await accountResponse.json();
+        // Log raw response for debugging
+        const accountResponseText = await accountResponse.text();
+        console.log('get_accounts.php response:', accountResponseText);
+        
+        let accountData;
+        try {
+            accountData = JSON.parse(accountResponseText);
+        } catch (e) {
+            console.error('Invalid JSON from get_accounts.php:', e, accountResponseText);
+            throw new Error('Invalid JSON response from get_accounts.php');
+        }
         
         if (accountData.success && accountData.data.length > 0) {
             const accountId = accountData.data[0].account_id;
             const customerResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_customer.php?account_id=${accountId}`, {
                 method: 'GET'
             });
-            const customerData = await customerResponse.json();
+            // Log raw response for debugging
+            const customerResponseText = await customerResponse.text();
+            console.log('get_customer.php response:', customerResponseText);
+            
+            let customerData;
+            try {
+                customerData = JSON.parse(customerResponseText);
+            } catch (e) {
+                console.error('Invalid JSON from get_customer.php:', e, customerResponseText);
+                throw new Error('Invalid JSON response from get_customer.php');
+            }
             
             if (customerData.success) {
                 const points = customerData.data.points || 0;
@@ -426,7 +443,6 @@ async function handlePhoneInput(event) {
             discountedTotal = originalTotal;
             document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
         }
-        // Cập nhật trạng thái nút sau khi xử lý số điện thoại
         confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash';
     } catch (error) {
         console.error('Lỗi kiểm tra khách hàng:', error);
@@ -452,7 +468,6 @@ function handleVoucherChange(event) {
     
     document.getElementById('discountedTotal').textContent = discountedTotal.toLocaleString('vi-VN') + ' VNĐ';
     
-    // Cập nhật trạng thái nút sau khi thay đổi voucher
     if (document.getElementById('paymentMethod').value === 'cash') {
         const cashAmount = parseFloat(cashInput.value) || 0;
         const change = cashAmount - discountedTotal;
@@ -466,7 +481,7 @@ function handleVoucherChange(event) {
             confirmBtn.disabled = true;
         }
     } else {
-        confirmBtn.disabled = false; // Kích hoạt nút cho thẻ hoặc chuyển khoản
+        confirmBtn.disabled = false;
     }
 }
 
@@ -483,8 +498,9 @@ async function confirmPayment() {
     
     try {
         let accountId = null;
-        let redeemResponse = null;
+        let pointsEarned = 0;
         
+        // Kiểm tra số điện thoại và lấy account_id
         if (phone && phone.match(/^\d{10}$/)) {
             const accountResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`);
             const accountData = await accountResponse.json();
@@ -492,9 +508,9 @@ async function confirmPayment() {
             if (accountData.success && accountData.data.length > 0) {
                 accountId = accountData.data[0].account_id;
                 
-                // Xử lý đổi voucher
+                // Xử lý đổi voucher nếu có
                 if (voucherId) {
-                    redeemResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/redeem_voucher.php`, {
+                    const redeemResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/redeem_voucher.php`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -509,21 +525,41 @@ async function confirmPayment() {
                         alert('Lỗi đổi voucher: ' + redeemData.message);
                         return;
                     }
+                } else {
+                    // Nếu không sử dụng voucher, tính điểm tích lũy
+                    const pointRulesResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/point_rules.php`, {
+                        method: 'GET'
+                    });
+                    const pointRulesData = await pointRulesResponse.json();
+                    
+                    if (pointRulesData.success && pointRulesData.data) {
+                        const totalPrice = discountedTotal;
+                        const rule = pointRulesData.data.find(r => 
+                            totalPrice >= parseFloat(r.min_amount) && 
+                            (!r.max_amount || totalPrice <= parseFloat(r.max_amount))
+                        );
+                        if (rule) {
+                            pointsEarned = parseInt(rule.points_earned);
+                        }
+                    }
                 }
             }
         }
         
+        // Cập nhật đơn hàng và xử lý tích điểm trong update_customer.php
         const updateOrderResponse = await fetch(
-            `http://localhost:81/SpicyNoodleProject/api/update_order.php?id=${currentPaymentOrderId}`, 
+            `http://localhost:81/SpicyNoodleProject/api/update_customer.php`, 
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ 
+                    order_id: currentPaymentOrderId,
                     status: 'paid',
                     account_id: accountId,
                     total_price: discountedTotal,
-                    voucher_id: voucherId || null
+                    voucher_id: voucherId || null,
+                    points_earned: pointsEarned
                 })
             }
         );
@@ -535,6 +571,7 @@ async function confirmPayment() {
             return;
         }
         
+        // Cập nhật trạng thái bàn
         const updateTableResponse = await fetch(
             `http://localhost:81/SpicyNoodleProject/api/update_table.php?id=${currentPaymentTableId}`, 
             {
@@ -555,8 +592,14 @@ async function confirmPayment() {
             return;
         }
         
-        alert(`Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : paymentMethod}!` + 
-              (voucherId ? `\nVoucher đã được áp dụng.` : ''));
+        // Thông báo thành công
+        let message = `Thanh toán thành công bằng ${paymentMethod === 'cash' ? 'tiền mặt' : paymentMethod}!`;
+        if (voucherId) {
+            message += `\nVoucher đã được áp dụng.`;
+        } else if (pointsEarned > 0) {
+            message += `\nĐã tích ${pointsEarned} điểm cho khách hàng.`;
+        }
+        alert(message);
         bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
         loadTables();
         
