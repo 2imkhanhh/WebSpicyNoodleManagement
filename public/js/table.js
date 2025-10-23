@@ -269,7 +269,7 @@ async function openPaymentModal(tableId) {
                     document.getElementById('paymentMethod').value = 'cash';
                     document.getElementById('cashAmount').value = '';
                     document.getElementById('cashAmountDiv').style.display = 'block';
-                    document.getElementById('confirmPaymentBtn').disabled = true;
+                    document.getElementById('confirmPaymentBtn').disabled = false; // Cho phép thanh toán ngay
                     document.getElementById('changeAmount').innerHTML = '';
                     document.getElementById('customerPhone').value = '';
                     document.getElementById('customerMessage').innerHTML = '';
@@ -311,22 +311,14 @@ function handlePaymentMethodChange(event) {
     
     if (method === 'cash') {
         cashDiv.style.display = 'block';
-        confirmBtn.disabled = true;
-        
+        confirmBtn.disabled = true; // Vẫn yêu cầu số tiền mặt đủ
         const cashInput = document.getElementById('cashAmount');
         cashInput.value = '';
         document.getElementById('changeAmount').innerHTML = '';
-        
         cashInput.addEventListener('input', handleCashInput);
     } else {
         cashDiv.style.display = 'none';
-        const phoneInput = document.getElementById('customerPhone').value;
-        if (phoneInput && phoneInput.match(/^\d{10}$/)) {
-            checkCustomer(phoneInput, confirmBtn);
-        } else {
-            confirmBtn.disabled = true;
-        }
-        
+        confirmBtn.disabled = false; // Cho phép thanh toán ngay với phương thức khác
         const cashInput = document.getElementById('cashAmount');
         cashInput.removeEventListener('input', handleCashInput);
     }
@@ -335,7 +327,6 @@ function handlePaymentMethodChange(event) {
 function handleCashInput(event) {
     const cashAmount = parseFloat(event.target.value.replace(/[^\d]/g, '')) || 0;
     const totalText = document.getElementById('paymentTotal').textContent;
-    
     const totalTextClean = totalText.replace(/\D/g, '');
     const total = parseFloat(totalTextClean) || 0;
     const change = cashAmount - total;
@@ -345,45 +336,9 @@ function handleCashInput(event) {
     
     if (change >= 0) {
         changeDiv.innerHTML = `<span class="text-success">Tiền thừa: ${change.toLocaleString('vi-VN')} VNĐ</span>`;
-        const phoneInput = document.getElementById('customerPhone').value;
-        if (phoneInput && phoneInput.match(/^\d{10}$/)) {
-            checkCustomer(phoneInput, confirmBtn);
-        } else {
-            confirmBtn.disabled = true;
-        }
+        confirmBtn.disabled = false; // Cho phép thanh toán nếu đủ tiền mặt
     } else {
         changeDiv.innerHTML = `<span class="text-danger">Thiếu: ${Math.abs(change).toLocaleString('vi-VN')} VNĐ</span>`;
-        confirmBtn.disabled = true;
-    }
-}
-
-async function checkCustomer(phone, confirmBtn) {
-    const customerMessage = document.getElementById('customerMessage');
-    
-    try {
-        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`, {
-            method: 'GET'
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            if (data.data.length > 0) {
-                customerMessage.innerHTML = `<span class="text-success">Khách hàng đã đăng ký.</span>`;
-                const paymentMethod = document.getElementById('paymentMethod').value;
-                if (paymentMethod !== 'cash' || (paymentMethod === 'cash' && parseFloat(document.getElementById('cashAmount').value) >= parseFloat(document.getElementById('paymentTotal').textContent.replace(/\D/g, '')))) {
-                    confirmBtn.disabled = false;
-                }
-            } else {
-                customerMessage.innerHTML = `<span class="text-warning">Khách hàng chưa đăng ký. Vui lòng đăng ký để được tích điểm.</span>`;
-                confirmBtn.disabled = true;
-            }
-        } else {
-            customerMessage.innerHTML = `<span class="text-danger">Lỗi: ${data.message}</span>`;
-            confirmBtn.disabled = true;
-        }
-    } catch (error) {
-        console.error('Lỗi kiểm tra khách hàng:', error);
-        customerMessage.innerHTML = `<span class="text-danger">Lỗi kiểm tra khách hàng: ${error.message}</span>`;
         confirmBtn.disabled = true;
     }
 }
@@ -393,13 +348,34 @@ async function handlePhoneInput(event) {
     const customerMessage = document.getElementById('customerMessage');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     
-    if (!phone.match(/^\d{10}$/)) {
-        customerMessage.innerHTML = `<span class="text-danger">Vui lòng nhập số điện thoại hợp lệ (10 chữ số).</span>`;
-        confirmBtn.disabled = true;
+    if (!phone) {
+        customerMessage.innerHTML = '';
+        confirmBtn.disabled = document.getElementById('paymentMethod').value === 'cash' && 
+                            parseFloat(document.getElementById('cashAmount').value || 0) < 
+                            parseFloat(document.getElementById('paymentTotal').textContent.replace(/\D/g, ''));
         return;
     }
     
-    await checkCustomer(phone, confirmBtn);
+    if (!phone.match(/^\d{10}$/)) {
+        customerMessage.innerHTML = `<span class="text-danger">Vui lòng nhập số điện thoại hợp lệ (10 chữ số).</span>`;
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`, {
+            method: 'GET'
+        });
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+            customerMessage.innerHTML = `<span class="text-success">Khách hàng đã đăng ký.</span>`;
+        } else {
+            customerMessage.innerHTML = `<span class="text-warning">Khách hàng chưa đăng ký.</span>`;
+        }
+    } catch (error) {
+        console.error('Lỗi kiểm tra khách hàng:', error);
+        customerMessage.innerHTML = `<span class="text-danger">Lỗi kiểm tra khách hàng: ${error.message}</span>`;
+    }
 }
 
 async function confirmPayment() {
@@ -412,7 +388,6 @@ async function confirmPayment() {
     const phone = document.getElementById('customerPhone').value;
     
     try {
-        // 1. Kiểm tra khách hàng
         let accountId = null;
         if (phone && phone.match(/^\d{10}$/)) {
             const accountResponse = await fetch(`http://localhost:81/SpicyNoodleProject/api/get_accounts.php?role=0&search=${phone}`);
@@ -420,21 +395,16 @@ async function confirmPayment() {
             
             if (accountData.success && accountData.data.length > 0) {
                 accountId = accountData.data[0].account_id;
-            } else {
-                alert('Lỗi: Khách hàng chưa đăng ký. Vui lòng đăng ký trước khi thanh toán.');
-                return;
             }
-        } else {
-            alert('Lỗi: Vui lòng nhập số điện thoại hợp lệ.');
-            return;
         }
         
-        // 2. Cập nhật đơn hàng: trạng thái "paid" và lưu account_id
+        // Cập nhật đơn hàng: trạng thái "paid" và lưu account_id (nếu có)
         const updateOrderResponse = await fetch(
             `http://localhost:81/SpicyNoodleProject/api/update_order.php?id=${currentPaymentOrderId}`, 
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ 
                     status: 'paid',
                     account_id: accountId
@@ -449,12 +419,13 @@ async function confirmPayment() {
             return;
         }
         
-        // 3. Cập nhật bàn về "Trống" và xóa order_id
+        // Cập nhật bàn về "Trống" và xóa order_id
         const updateTableResponse = await fetch(
             `http://localhost:81/SpicyNoodleProject/api/update_table.php?id=${currentPaymentTableId}`, 
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ 
                     status: 'Trống', 
                     order_id: null 
