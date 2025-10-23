@@ -2,6 +2,7 @@
 class Customer {
     private $conn;
     private $table = "customers";
+    private $voucher_table = "vouchers";
 
     public $customer_id;
     public $account_id;
@@ -62,7 +63,7 @@ class Customer {
         return $stmt->rowCount() > 0;
     }
 
-    // Xóa customer theo account_id (MỚI THÊM)
+    // Xóa customer theo account_id
     public function deleteByAccountId($account_id) {
         error_log("=== Customer deleteByAccountId DEBUG ===");
         error_log("Account ID: $account_id");
@@ -158,6 +159,7 @@ class Customer {
         return $stmt->execute();
     }
 
+    // Lấy customer theo số điện thoại
     public function getByPhone($phone) {
         $query = "SELECT c.*, a.name, a.email, a.phone 
                 FROM {$this->table} c 
@@ -167,6 +169,18 @@ class Customer {
         $stmt->bindParam(":phone", $phone);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Lấy danh sách voucher có thể đổi dựa trên số điểm
+    public function getAvailableVouchers($points) {
+        $query = "SELECT voucher_id, voucher_code, discount_percent, points_require 
+                  FROM {$this->voucher_table} 
+                  WHERE points_require <= :points 
+                  ORDER BY points_require ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":points", $points, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>
