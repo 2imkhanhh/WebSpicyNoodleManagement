@@ -16,7 +16,7 @@ class OrderController
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] != "POST") {
-            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+            return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
         $input_data = array(
@@ -55,7 +55,7 @@ class OrderController
     public function update()
     {
         if ($_SERVER['REQUEST_METHOD'] != "POST") {
-            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+            return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
         $order_id = isset($_GET['id']) ? $_GET['id'] : '';
@@ -134,28 +134,56 @@ class OrderController
     public function get()
     {
         if ($_SERVER['REQUEST_METHOD'] != "GET") {
-            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+            return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
         $order_id = isset($_GET['id']) ? $_GET['id'] : null;
         $account_id = isset($_GET['account_id']) ? $_GET['account_id'] : null;
+        $status = isset($_GET['status']) ? strtolower($_GET['status']) : null;
 
         if ($order_id) {
             $orders = $this->order->get($order_id);
-            return array("message" => "Thông tin đơn hàng", "success" => true, "status" => 200, "data" => $orders);
         } elseif ($account_id) {
             $orders = $this->order->getByAccountId($account_id);
-            return array("message" => "Lịch sử đơn hàng", "success" => true, "status" => 200, "data" => $orders);
         } else {
             $orders = $this->order->get();
-            return array("message" => "Danh sách đơn hàng", "success" => true, "status" => 200, "data" => $orders);
+            if ($status) {
+                $orders = array_filter($orders, function($order) use ($status) {
+                    return $order['status'] === $status;
+                });
+            }
         }
+
+        // Thêm tableName và phone từ bảng accounts vào dữ liệu trả về
+        foreach ($orders as &$order) {
+            // Lấy tableName
+            $table_query = "SELECT name FROM tablefood WHERE table_id = :table_id";
+            $table_stmt = $this->conn->prepare($table_query);
+            $table_stmt->bindParam(':table_id', $order['tableID'], PDO::PARAM_INT);
+            $table_stmt->execute();
+            $table = $table_stmt->fetch(PDO::FETCH_ASSOC);
+            $order['tableName'] = $table ? $table['name'] : null;
+
+            // Lấy phone từ bảng accounts
+            if ($order['account_id']) {
+                $account_query = "SELECT phone FROM accounts WHERE account_id = :account_id";
+                $account_stmt = $this->conn->prepare($account_query);
+                $account_stmt->bindParam(':account_id', $order['account_id'], PDO::PARAM_INT);
+                $account_stmt->execute();
+                $account = $account_stmt->fetch(PDO::FETCH_ASSOC);
+                $order['phone'] = $account ? $account['phone'] : null;
+            } else {
+                $order['phone'] = null;
+            }
+        }
+
+        return array("message" => "Danh sách đơn hàng", "success" => true, "status" => 200, "data" => array_values($orders));
     }
 
     public function getDetails()
     {
         if ($_SERVER['REQUEST_METHOD'] != "GET") {
-            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+            return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
         $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : '';
@@ -170,7 +198,7 @@ class OrderController
     public function delete()
     {
         if ($_SERVER['REQUEST_METHOD'] != "DELETE") {
-            return array("message" => "Method not allowed.", "success" => false, "status" => 405);
+            return array("message" => "Phương thức không được phép.", "success" => false, "status" => 405);
         }
 
         $order_id = isset($_GET['id']) ? $_GET['id'] : '';

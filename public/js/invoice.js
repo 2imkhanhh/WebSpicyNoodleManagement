@@ -49,6 +49,7 @@ async function viewInvoice(orderId) {
             document.getElementById('viewOrderId').textContent = order.order_id;
             document.getElementById('viewOrderDate').textContent = order.orderDate;
             document.getElementById('viewTableName').textContent = order.tableName || 'Bàn ' + order.tableID;
+            document.getElementById('viewCustomerPhone').textContent = order.phone || 'Không có';
             document.getElementById('viewTotalPrice').textContent = parseFloat(order.totalPrice).toLocaleString('vi-VN');
 
             // Lấy chi tiết đơn hàng

@@ -1,0 +1,287 @@
+/* invoice.css */
+
+/* ===== Invoice Table Container ===== */
+.content .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.content .card h4 {
+    color: #B85C38;
+    font-weight: 600;
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+}
+
+/* ===== Invoice Table ===== */
+.table {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #F5E8C7 0%, #E8D5B7 100%);
+    color: #B85C38;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 15px 12px;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+    background-color: #fff5e6;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* ===== Status Badge ===== */
+.badge.bg-success {
+    background-color: #28A745;
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+/* ===== Action Buttons ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #B85C38 0%, #A54A2E 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #8F4228 0%, #7A3A24 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 92, 56, 0.3);
+}
+
+.btn-primary i {
+    font-size: 0.9rem;
+}
+
+/* ===== Modal Styles ===== */
+.modal-content {
+    border-radius: 12px;
+    border: 1px solid #D68C45;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #B85C38 0%, #A54A2E 100%) !important;
+    border-bottom: 1px solid #D68C45;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-body p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.modal-body p strong {
+    color: #495057;
+    min-width: 150px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.modal-body h6 {
+    color: #B85C38;
+    font-weight: 600;
+    margin: 20px 0 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== Order Items Table in Modal ===== */
+#viewOrderItemsTable {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+#viewOrderItemsTable thead th {
+    background: linear-gradient(135deg, #F5E8C7 0%, #E8D5B7 100%);
+    color: #B85C38;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 10px;
+}
+
+#viewOrderItemsTable tbody td {
+    padding: 10px;
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+#viewOrderItemsTable tbody tr:hover {
+    background-color: #fff5e6;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 15px 20px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .content .card {
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 8px 6px;
+        font-size: 0.85rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .modal-body p strong {
+        min-width: 120px;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .table tbody td {
+        display: block;
+        text-align: right;
+        padding: 5px 0;
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+
+    .table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        font-weight: 600;
+        color: #B85C38;
+    }
+
+    #viewOrderItemsTable thead {
+        display: table-header-group;
+    }
+
+    #viewOrderItemsTable tbody tr {
+        display: table-row;
+    }
+
+    #viewOrderItemsTable tbody td {
+        display: table-cell;
+        text-align: left;
+        padding: 10px;
+    }
+
+    #viewOrderItemsTable tbody td::before {
+        content: none;
+    }
+}
+
+/* ===== Custom Scrollbar ===== */
+.content .card::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content .card::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.content .card::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+    background: #B85C38;
+    border-radius: 3px;
+}
+
+.content .card::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #8F4228;
+}
