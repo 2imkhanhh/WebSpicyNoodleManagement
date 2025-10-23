@@ -8,7 +8,6 @@ class Customer {
     public $customer_id;
     public $account_id;
     public $points;
-    public $order_id;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -30,8 +29,8 @@ class Customer {
             return true; // Đã tồn tại thì không cần tạo mới
         }
         
-        $query = "INSERT INTO {$this->table} (account_id, points, order_id) 
-                VALUES (:account_id, 0, 0)";
+        $query = "INSERT INTO {$this->table} (account_id, points) 
+                  VALUES (:account_id, 0)";
         
         error_log("Customer query: " . $query);
         
@@ -139,15 +138,6 @@ class Customer {
         $query = "UPDATE {$this->table} SET points = :points WHERE customer_id = :customer_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":points", $points, PDO::PARAM_INT);
-        $stmt->bindParam(":customer_id", $customer_id, PDO::PARAM_INT);
-        return $stmt->execute();
-    }
-
-    // Cập nhật order_id (khi có đơn hàng)
-    public function updateOrderId($customer_id, $order_id) {
-        $query = "UPDATE {$this->table} SET order_id = :order_id WHERE customer_id = :customer_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":order_id", $order_id);
         $stmt->bindParam(":customer_id", $customer_id, PDO::PARAM_INT);
         return $stmt->execute();
     }
