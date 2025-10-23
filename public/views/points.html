@@ -27,27 +27,27 @@
                     <li><a href="tables.html"><i class="fas fa-table"></i> Quản lý bàn</a></li>
                     <li><a href="customers.html"><i class="fas fa-user-friends"></i> Quản lý khách hàng</a></li>
                     <li><a href="points.html" class="active"><i class="fas fa-gift"></i> Quản lý Tích Điểm</a></li>
-                    <li><a href="invoice.html"><i class="fas fa-file-invoice"></i>Quản lý hoá đơn</a></li>
+                    <li><a href="invoice.html"><i class="fas fa-file-invoice"></i> Quản lý hoá đơn</a></li>
                 </ul>
             </nav>
         </aside>
         <main class="main-content">
             <header class="dashboard-header">
                 <div class="header-left">
-                    <h2><i class="fas fa-gift"></i>Quản lý Tích Điểm</h2>
+                    <h2><i class="fas fa-gift"></i> Quản lý Tích Điểm</h2>
                 </div>
                 <div class="user-account">
                     <span class="user-name" id="userName">Xin chào, [Tên người dùng]</span>
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user me-1"></i>Tài khoản
+                            <i class="fas fa-user me-1"></i> Tài khoản
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="account.html">
-                                <i class="fas fa-user me-1"></i>Thông tin tài khoản
+                                <i class="fas fa-user me-1"></i> Thông tin tài khoản
                             </a></li>
                             <li><a class="dropdown-item" href="#" onclick="logout()">
-                                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                                <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
                             </a></li>
                         </ul>
                     </div>
@@ -59,6 +59,7 @@
                         <div class="card p-4">
                             <h5>Quy định tích điểm</h5>
                             <form id="pointsRuleForm">
+                                <input type="hidden" id="pointRuleId">
                                 <div class="mb-3">
                                     <label class="form-label">Số tiền tối thiểu (VNĐ)</label>
                                     <input type="number" step="0.01" class="form-control" id="minAmount" placeholder="Nhập số tiền tối thiểu">
@@ -71,7 +72,10 @@
                                     <label class="form-label">Số điểm tích được</label>
                                     <input type="number" class="form-control" id="pointsEarned" placeholder="Nhập số điểm">
                                 </div>
-                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-primary" id="addPointRuleBtn">Thêm</button>
+                                    <button type="button" class="btn btn-warning" id="updatePointRuleBtn" style="display: none;">Cập nhật</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -79,6 +83,7 @@
                         <div class="card p-4">
                             <h5>Quy định đổi voucher</h5>
                             <form id="voucherRuleForm">
+                                <input type="hidden" id="voucherRuleId">
                                 <div class="mb-3">
                                     <label class="form-label">Số điểm cần đổi</label>
                                     <input type="number" class="form-control" id="pointRequire" placeholder="Nhập số điểm">
@@ -91,7 +96,10 @@
                                     <label class="form-label">Mã voucher</label>
                                     <input type="text" class="form-control" id="voucherCode" placeholder="Nhập mã voucher">
                                 </div>
-                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-primary" id="addVoucherRuleBtn">Thêm</button>
+                                    <button type="button" class="btn btn-warning" id="updateVoucherRuleBtn" style="display: none;">Cập nhật</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -131,6 +139,7 @@
     <script src="../js/auth.js"></script>
     <script src="../js/points.js"></script>
     <script src="../js/dashboard.js"></script>
+    
     <script>
         function logout() {
             alert("Đăng xuất thành công!");
