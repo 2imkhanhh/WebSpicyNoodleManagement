@@ -1,0 +1,111 @@
+/* ==============================
+   BODY
+============================== */
+body {
+  background-color: #fffaf5;
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* ==============================
+   ACCOUNT CONTAINER (full width)
+============================== */
+.account-container {
+  width: 100%;           /* chiếm toàn bộ vùng content */
+  max-width: 100%;
+  margin: 30px 0;        /* cách trên dưới */
+  padding: 0;            /* bỏ padding lớn */
+  background: transparent; /* bỏ background trắng */
+  border-radius: 0;      /* bỏ bo góc */
+  box-shadow: none;      /* bỏ shadow */
+}
+
+/* ==============================
+   FORM
+============================== */
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-form label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.account-form input.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.account-form input.form-control:focus {
+  border-color: #e15b36;
+  box-shadow: 0 0 5px rgba(225, 91, 54, 0.2);
+  outline: none;
+}
+
+/* ==============================
+   INPUT GROUP (Password + Eye)
+============================== */
+.input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-eye {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.btn-eye:hover {
+  color: #e15b36;
+}
+
+/* ==============================
+   BUTTONS
+============================== */
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+button.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  min-width: 140px;
+  transition: all 0.3s ease;
+}
+
+.btn-success {
+  background-color: #e15b36;
+  border-color: #e15b36;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background-color: #c54d2d;
+  border-color: #c54d2d;
+}
+
+.btn-secondary {
+  background-color: #888;
+  border-color: #888;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #666;
+  border-color: #666;
+}
